@@ -1,0 +1,10 @@
+{
+  "data_paths": [
+    "F:/PythonProjects/WineRecognition2/data/csv/Halliday_Wine_AU-only_completed_rows.csv",
+    "F:/PythonProjects/WineRecognition2/data/csv/WineSearcher_Wine_AU-only_completed_rows.csv"
+  ],
+  "data_info_path": "F:/PythonProjects/WineRecognition2/data_info.json",
+  "output_csv_folder": "F:/PythonProjects/WineRecognition2/data/dictionaries/Dict-byword_Halliday_Winesearcher_Wine_AU-only_completed_rows",
+  "output_excel_path": "F:/PythonProjects/WineRecognition2/data/dictionaries/Dict-byword_Halliday_Winesearcher_Wine_AU-only_completed_rows.xlsx",
+  "byword": true
+}

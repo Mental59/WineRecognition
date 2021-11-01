@@ -1,0 +1,81 @@
+{
+  "keys": {
+    "main": [
+      "Add_TradeName",
+      "Add_Brand",
+      "Add_KeyWordTrue",
+      "Add_GrapeVarieties",
+      "Add_GeoIndication",
+      "Add_WineType",
+      "Add_WineColor",
+      "Add_Vintage",
+      "Add_Price"
+    ],
+    "all": [
+      "Add_TradeName",
+      "Add_Brand",
+      "Add_KeyWordTrue",
+      "Add_KeyWordFalse",
+      "Add_GrapeVarieties",
+      "Add_GeoIndication",
+      "Add_WineType",
+      "Add_BottleSize",
+      "Add_Sweetness",
+      "Add_WineColor",
+      "Add_ClosureType",
+      "Add_Certificate",
+      "Add_Vintage",
+      "Add_Price"
+    ],
+    "without_add": [
+      "TradeName",
+      "Seller name",
+      "Seller desc",
+      "Seller country",
+      "GrapeVarieties",
+      "GeoIndication",
+      "WineColor",
+      "BottleSize",
+      "Country Hierarchy",
+      "Vintage",
+      "Seller price"
+    ],
+    "origin_full_name": [
+      "OriginFullName"
+    ],
+    "numerical": [
+      "Add_BottleSize",
+      "Add_Price",
+      "Add_Vintage"
+    ],
+    "string": [
+      "Add_Brand",
+      "Add_Certificate",
+      "Add_ClosureType",
+      "Add_GeoIndication",
+      "Add_GrapeVarieties",
+      "Add_KeyWordFalse",
+      "Add_KeyWordTrue",
+      "Add_Sweetness",
+      "Add_TradeName",
+      "Add_WineColor",
+      "Add_WineType"
+    ]
+  },
+  "all_keys_probs": {
+    "producer": ["Add_TradeName", 1.0],
+    "brand":  ["Add_Brand", 1.0],
+    "keywordTrue":  ["Add_KeyWordTrue", 1.0],
+    "keywordFalse":  ["Add_KeyWordFalse", 0.5],
+    "grape":  ["Add_GrapeVarieties", 1.0],
+    "region":  ["Add_GeoIndication", 0.5],
+    "type":  ["Add_WineType", 0.6],
+    "bottleSize":  ["Add_BottleSize", 0.6],
+    "sweetness":  ["Add_Sweetness", 0.6],
+    "color":  ["Add_WineColor", 0.6],
+    "closure":  ["Add_ClosureType", 0.5],
+    "certificate":  ["Add_Certificate", 1.0],
+    "vintage":  ["Add_Vintage", 0.7],
+    "price": ["Add_Price", 0.75]
+  }
+}
