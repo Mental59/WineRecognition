@@ -157,7 +157,7 @@ class DataGenerator:
     @staticmethod
     def __process_entry(row, column, write_labels: bool) -> str:
 
-        res = ''
+        res = []
 
         for word in row.split():
 
@@ -165,25 +165,27 @@ class DataGenerator:
 
             for symbol in word:
                 if symbol in string.punctuation:
-                    res += f'{symbol} Punctuation\n' if write_labels else f'{symbol}\n'
+                    res.append(f'{symbol} Punctuation\n' if write_labels else f'{symbol}\n')
                 else:
                     break
 
             word_removed_punctuations = DataGenerator.regex.sub('', word)
 
             if word_removed_punctuations:
-                res += f'{word_removed_punctuations} {column}\n' if write_labels \
+                res.append(
+                    f'{word_removed_punctuations} {column}\n' if write_labels
                     else f'{word_removed_punctuations}\n'
+                )
                 word_processed = True
 
             if word_processed:
                 for symbol in word[::-1]:
                     if symbol in string.punctuation:
-                        res += f'{symbol} Punctuation\n' if write_labels else f'{symbol}\n'
+                        res.append(f'{symbol} Punctuation\n' if write_labels else f'{symbol}\n')
                     else:
                         break
 
-        return res
+        return ''.join(res)
 
     @staticmethod
     def generate_data_text(data: pd.DataFrame, keys: list, write_labels=True) -> str:
@@ -191,17 +193,17 @@ class DataGenerator:
             r'(^[%s]*)|([%s]*$)' % (';,', ';,')
         )
 
-        res = ''
-        for index, row in data.iterrows():
+        res = []
+        for _, row in data.iterrows():
             for column in filter(lambda key: key in data.columns, keys):
 
                 row_column = r.sub('', str(row[column]))
 
                 if row_column:
-                    res += DataGenerator.__process_entry(row_column, column, write_labels)
-            res += '\n'
+                    res.append(DataGenerator.__process_entry(row_column, column, write_labels))
+            res.append('\n')
 
-        return res
+        return ''.join(res)
 
     @staticmethod
     def generate_data_text_complex(data: pd.DataFrame, complex_generator, write_labels=True) -> str:
@@ -215,8 +217,8 @@ class DataGenerator:
         r = re.compile(
             r'(^[%s]*)|([%s]*$)' % (';,', ';,')
         )
-        res = ''
-        for index, row in data.iterrows():
+        res = []
+        for _, row in data.iterrows():
             for column in complex_generator:
 
                 row_column = r.sub(
@@ -225,10 +227,10 @@ class DataGenerator:
                 )
 
                 if row_column:
-                    res += DataGenerator.__process_entry(row_column, column, write_labels)
-            res += '\n'
+                    res.append(DataGenerator.__process_entry(row_column, column, write_labels))
+            res.append('\n')
 
-        return res
+        return ''.join(res)
 
     @staticmethod
     def generate_sents(lines: list):

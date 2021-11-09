@@ -1,4 +1,4 @@
 {
-  "experiment": "Experiment-2 - BiLSTM_CRF",
+  "experiment": "BiLSTM_CRF-Halliday-WineSearcher-5percent",
   "artifacts_path": "G:/PythonProjects/WineRecognition2/artifacts"
 }

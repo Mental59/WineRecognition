@@ -17,11 +17,11 @@ from data_master import DataLoader
 
 dictionary_paths_vocab_names = [
     (
-        '../data/dictionaries/Dict-byword_Halliday_Wine_AU-only_completed_rows',
+        'G:/PythonProjects/WineRecognition2/data/dictionaries/Dict-byword_Halliday_Wine_AU-only_completed_rows',
         'Words_Halliday_Wine_AU'
     ),
     (
-        '../data/dictionaries/Dict-byword_Halliday_WineSearcher_Wine_AU-only_completed_rows',
+        'G:/PythonProjects/WineRecognition2/data/dictionaries/Dict-byword_Halliday_WineSearcher_Wine_AU-only_completed_rows',
         'Words_Halliday_WineSearcher_Wine_AU'
     )
 ]
@@ -47,11 +47,11 @@ for dictionary_path, vocab_name in dictionary_paths_vocab_names:
             vocab[p] = i
             i += 1
 
-    for w in ['PAD']:
+    for w in ['PAD', 'UNK']:
         vocab[w] = i
         i += 1
 
-    with open(os.path.join('../data/vocabs/', f'{vocab_name}.json'), 'w', encoding='utf-8') as file:
+    with open(os.path.join('G:/PythonProjects/WineRecognition2/data/vocabs/', f'{vocab_name}.json'), 'w', encoding='utf-8') as file:
         json.dump(vocab, file)
 
     print('Vocab length:', len(vocab))

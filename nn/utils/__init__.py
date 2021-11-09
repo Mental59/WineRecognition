@@ -7,13 +7,15 @@ from copy import deepcopy
 class CustomDataset(Dataset):
     def __init__(self, data, tag_to_ix, word_to_ix):
         super(CustomDataset, self).__init__()
+        self.word_to_ix = word_to_ix
+        self.tag_to_ix = tag_to_ix
         self.data = self.prepare_dataset(deepcopy(data), tag_to_ix, word_to_ix)
 
     @staticmethod
     def prepare_dataset(data, tag_to_ix, word_to_ix):
         max_len = len(max(data, key=lambda x: len(x[0]))[0])
         for index, (sentence, tags) in enumerate(data):
-            sentence = [word_to_ix[word] for word in sentence]
+            sentence = [word_to_ix[word] if word in word_to_ix else word_to_ix['UNK'] for word in sentence]
             tags = [tag_to_ix[tag] for tag in tags]
 
             sentence.extend([word_to_ix['PAD']] * (max_len - len(sentence)))
@@ -25,6 +27,16 @@ class CustomDataset(Dataset):
             )
 
         return data
+    
+    def count(self, word: str):
+        if word not in self.word_to_ix:
+            raise ValueError(f'Tag: {word} is not in word_to_ix dictionary keys')
+        word_ix = self.word_to_ix[word]
+        count_word = 0
+        for sentence, _ in self.data:
+            count_word += torch.sum(sentence == word_ix).item()
+        return count_word
+
 
     def __getitem__(self, index):
         sentence, tags = self.data[index]
