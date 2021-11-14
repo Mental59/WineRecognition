@@ -1,4 +1,4 @@
 {
-  "experiment": "test_experiment",
+  "experiment": "Pytorch_LSTM-CRF_SkLearn",
   "artifacts_path": "G:/PythonProjects/WineRecognition2/artifacts"
 }

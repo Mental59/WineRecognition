@@ -37,7 +37,6 @@ class CustomDataset(Dataset):
             count_word += torch.sum(sentence == word_ix).item()
         return count_word
 
-
     def __getitem__(self, index):
         sentence, tags = self.data[index]
         mask = tags >= 0

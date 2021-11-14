@@ -1,6 +1,7 @@
 import os
 import json
 import mlflow
+import pandas as pd
 from sklearn_crfsuite import metrics
 
 from data_master import DataAnalyzer
@@ -42,4 +43,29 @@ def log_mlflow_on_train(run_params, model, classes, losses, y_true, y_pred, test
 
         mlflow.pytorch.log_model(model, f"{run_params['output_dir']}/model")
 
+        mlflow.log_params(run_params)
+
+
+def log_mlflow_on_test(run_params, classes, x, y):
+    exp_settings = json.load(
+        open(r"G:\PythonProjects\WineRecognition2\nn\experiment_settings.json")
+    )
+
+    with open('{}/results.txt'.format(run_params['output_dir']), 'w', encoding='utf-8') as file:
+        for sentence, tags in zip(x, y):
+            f = ['%-20s'] * len(sentence)
+            file.write(' '.join(f) % tuple(tags) + '\n')
+            file.write(' '.join(f) % tuple(sentence) + '\n')
+
+    df = []
+    for sentence, tags in zip(x, y):
+        output = [' '.join(word for word, tag in zip(sentence, tags) if tag == cls) for cls in classes]
+        df.append(output)
+
+    pd.DataFrame(df, columns=classes).to_excel('{}/results.xlsx'.format(run_params['output_dir']))
+
+    mlflow.set_experiment(exp_settings['experiment'])
+
+    with mlflow.start_run(run_name=run_params['run_name']):
+        mlflow.log_artifacts(run_params['output_dir'])
         mlflow.log_params(run_params)
