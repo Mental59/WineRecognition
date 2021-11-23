@@ -20,6 +20,11 @@ class BiLSTM_CRF(nn.Module):
         self.hidden2tags = nn.Linear(hidden_dim * 2, num_tags)
         self.crf = CRF(num_tags, batch_first=batch_first)
 
+    def get_lstm_features(self, x):
+        x = self.embedding(x)
+        x, _ = self.lstm(x)
+        return x
+
     def neg_log_likehood(
             self,
             x: torch.Tensor,
@@ -38,8 +43,7 @@ class BiLSTM_CRF(nn.Module):
         :return: `~torch.Tensor`: The log likelihood. This will have size ``(batch_size,)`` if
             reduction is ``none``, ``()`` otherwise.
         """
-        x = self.embedding(x)
-        x, _ = self.lstm(x)
+        x = self.get_lstm_features(x)
         x = self.hidden2tags(x)
         x = -self.crf(x, tags, mask, reduction)
         return x
@@ -50,8 +54,7 @@ class BiLSTM_CRF(nn.Module):
         :param mask: BoolTensor of size (batch_size, seq_length)
         :return: Tensor of size (batch_size, seq_length)
         """
-        x = self.embedding(x)
-        x, _ = self.lstm(x)
+        x = self.get_lstm_features(x)
         x = self.hidden2tags(x)
         x = self.crf.decode(x, mask)
         return x

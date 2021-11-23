@@ -1,3 +1,4 @@
+import os
 import torch
 from torch.utils.data import Dataset
 from matplotlib import pyplot as plt
@@ -46,9 +47,8 @@ class CustomDataset(Dataset):
         return len(self.data)
 
 
-def train(model, optimizer, dataloaders, device, num_epochs, tqdm=None, verbose=True):
+def train(model, optimizer, dataloaders, device, num_epochs, output_dir, tqdm=None, verbose=True):
     losses = {'train': [], 'val': []}
-    best_model_wts = None
     best_loss = None
 
     for epoch in range(1, num_epochs + 1) if tqdm is None else tqdm(range(1, num_epochs + 1)):
@@ -76,7 +76,7 @@ def train(model, optimizer, dataloaders, device, num_epochs, tqdm=None, verbose=
 
         if best_loss is None or best_loss > losses_per_batch['val']:
             best_loss = losses_per_batch['val']
-            best_model_wts = model.state_dict()
+            torch.save(model.state_dict(), os.path.join(output_dir, 'model.pth'))
 
         if verbose:
             print(
@@ -86,7 +86,7 @@ def train(model, optimizer, dataloaders, device, num_epochs, tqdm=None, verbose=
                 sep=', '
             )
 
-    model.load_state_dict(best_model_wts)
+    model.load_state_dict(torch.load(os.path.join(output_dir, 'model.pth')))
     return model, losses
 
 

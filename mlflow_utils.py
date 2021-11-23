@@ -9,7 +9,7 @@ import pandas as pd
 
 def log_mlflow_on_train(run_params, model, y_true, y_pred, test_eval=None):
     exp_settings = json.load(
-        open(r"F:\PythonProjects\WineRecognition2\experiment_settings.json")
+        open(r'G:\PythonProjects\WineRecognition2\experiment_settings.json')
     )
 
     mlflow.set_experiment(exp_settings['experiment'])
@@ -37,10 +37,6 @@ def log_mlflow_on_train(run_params, model, y_true, y_pred, test_eval=None):
             )
 
         mlflow.log_text(
-            str(run_params.pop('features')),
-            f"{run_params['output_dir']}/features.txt"
-        )
-        mlflow.log_text(
             eli5.format_as_html(eli5.explain_weights(model)),
             f"{run_params['output_dir']}/explained_weights.html"
         )
@@ -54,7 +50,7 @@ def log_mlflow_on_train(run_params, model, y_true, y_pred, test_eval=None):
 
 def log_mlflow_on_test(run_params, model, y_true, y_pred, test_eval=None):
     exp_settings = json.load(
-        open(r"F:\PythonProjects\WineRecognition2\experiment_settings.json")
+        open(r"G:\PythonProjects\WineRecognition2\experiment_settings.json")
     )
 
     mlflow.set_experiment(exp_settings['experiment'])
@@ -86,9 +82,5 @@ def log_mlflow_on_test(run_params, model, y_true, y_pred, test_eval=None):
             with pd.ExcelWriter(os.path.join(run_params['output_dir'], 'results.xlsx'), engine='xlsxwriter') as writer:
                 test_eval.to_excel(writer, sheet_name='values')
 
-        mlflow.log_text(
-            str(run_params.pop('features')),
-            f"{run_params['output_dir']}/features.txt"
-        )
         mlflow.log_artifacts(run_params['output_dir'])
         mlflow.log_params(run_params)

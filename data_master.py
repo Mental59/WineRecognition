@@ -257,7 +257,8 @@ class DataGenerator:
                 sentences, tags = [], []
                 continue
 
-            sentence, tag = line.split()
+            sentence, *tag = line.split()
+            tag = ' '.join(tag)
             sentences.append(sentence)
             tags.append(tag)
 

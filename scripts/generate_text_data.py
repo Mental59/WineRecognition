@@ -11,6 +11,9 @@ python .\scripts\generate_text_data.py -l -k all .\data\csv\Halliday_Wine_AU-all
 python .\scripts\generate_text_data.py -l -k all .\data\csv\WineSearcher_Wine_AU-all_rows-all_columns.csv ./data/text/WineSearcher_Wine_AU-all_rows-all_keys.txt
 python .\scripts\generate_text_data.py -l -k origin_full_name .\data\csv\WineSearcher_Wine_AU-all_rows-all_columns.csv ./data/text/WineSearcher_Wine_AU-all_rows-origin_fullname.txt
 python .\scripts\generate_text_data.py -l -k without_add .\data\csv\WineSearcher_Wine_AU-all_rows-all_columns.csv ./data/text/WineSearcher_Wine_AU-all_rows-without_add.txt
+python .\scripts\generate_text_data.py -l -k all .\data\csv\WineSearcher_Wine_AU-only_completed_rows-all_columns.csv ./data/text/WineSearcher_Wine_AU-only_completed_rows-all_keys.txt
+python .\scripts\generate_text_data.py -l -k origin_full_name .\data\csv\WineSearcher_Wine_AU-only_completed_rows-all_columns.csv ./data/text/WineSearcher_Wine_AU-only_completed_rows-origin_fullname.txt
+
 """
 
 
