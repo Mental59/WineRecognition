@@ -43,7 +43,7 @@ parser.add_argument(
 )
 parser.add_argument(
     '--only-completed-rows',
-    help='Store only rows with True on collumn IsCompleted',
+    help='Store only rows with True on column IsCompleted',
     action='store_true'
 )
 args = parser.parse_args()

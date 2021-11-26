@@ -23,7 +23,7 @@ if upper_dir not in sys.path:
     sys.path.insert(0, upper_dir)
 
 
-from data_master import DataGenerator, DataLoader, ComplexGenerator
+from data_master import DataGenerator, DataLoader, ComplexGeneratorMain
 
 
 parser = argparse.ArgumentParser()
@@ -67,7 +67,7 @@ with open(args.output, 'w', encoding='utf-8') as file:
         file.write(
             DataGenerator.generate_data_text_complex(
                 data=data,
-                complex_generator=ComplexGenerator(data_info['all_keys_probs']),
+                complex_generator=ComplexGeneratorMain(data_info['all_keys_probs']),
                 write_labels=args.labels
             )
         )

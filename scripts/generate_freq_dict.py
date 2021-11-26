@@ -1,14 +1,5 @@
 import os
-import sys
 import json
-
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
-upper_dir = os.path.split(current_dir)[0]
-if upper_dir not in sys.path:
-    sys.path.insert(0, upper_dir)
-
-
 from data_master import DataGenerator, DataLoader, DataSaver
 
 

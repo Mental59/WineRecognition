@@ -2,7 +2,7 @@ import re
 import json
 
 
-data_info = json.load(open(r"F:\PythonProjects\WineRecognition2\data_info.json"))
+data_info = json.load(open(r"G:\PythonProjects\WineRecognition2\data_info.json"))
 
 NUMBER_KEYS = data_info['keys']['numerical']
 WORD_KEYS = data_info['keys']['string']
@@ -54,16 +54,16 @@ def word2features(sent, i: int, freq_dict):
         'isNumber(word)': is_number
     }
 
-    """probs = calculate_probs(word, is_number, getprob_binary, freq_dict)
+    probs = calculate_probs(word, is_number, getprob_binary, freq_dict)
     for key in probs:
-        features[key] = probs[key]"""
+        features[key] = probs[key]
 
     if i > 0:
         word1, label1 = sent[i - 1]
 
-        """probs1 = calculate_probs(f'{word1} {word}', False, getprob_binary, freq_dict)
+        probs1 = calculate_probs(f'{word1} {word}', False, getprob_binary, freq_dict)
         for key in probs1:
-            features[f'-1:BGram.{key}'] = probs1[key]"""
+            features[f'-1:BGram.{key}'] = probs1[key]
 
         features.update({
             '-1:word.lower()': word1.lower(),
@@ -73,9 +73,9 @@ def word2features(sent, i: int, freq_dict):
     if i < len(sent) - 1:
         word1, label1 = sent[i + 1]
 
-        """probs1 = calculate_probs(f'{word} {word1}', False, getprob_binary, freq_dict)
+        probs1 = calculate_probs(f'{word} {word1}', False, getprob_binary, freq_dict)
         for key in probs1:
-            features[f'+1:BGram.{key}'] = probs1[key]"""
+            features[f'+1:BGram.{key}'] = probs1[key]
 
         features.update({
             '+1:word.lower()': word1.lower(),

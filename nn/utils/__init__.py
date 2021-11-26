@@ -6,37 +6,18 @@ from copy import deepcopy
 
 
 class CustomDataset(Dataset):
-    def __init__(self, data, tag_to_ix, word_to_ix):
+    def __init__(self, data, tag_to_ix, word_to_ix, case_sensitive=True):
         super(CustomDataset, self).__init__()
+        self.case_sensitive = case_sensitive
+        self.pad = 'PAD'
+        self.unk = 'UNK'
         self.word_to_ix = word_to_ix
         self.tag_to_ix = tag_to_ix
-        self.data = self.prepare_dataset(deepcopy(data), tag_to_ix, word_to_ix)
-
-    @staticmethod
-    def prepare_dataset(data, tag_to_ix, word_to_ix):
-        max_len = len(max(data, key=lambda x: len(x[0]))[0])
-        for index, (sentence, tags) in enumerate(data):
-            sentence = [word_to_ix[word] if word in word_to_ix else word_to_ix['UNK'] for word in sentence]
-            tags = [tag_to_ix[tag] for tag in tags]
-
-            sentence.extend([word_to_ix['PAD']] * (max_len - len(sentence)))
-            tags.extend([-1] * (max_len - len(tags)))
-
-            data[index] = (
-                torch.LongTensor(sentence),
-                torch.LongTensor(tags)
-            )
-
-        return data
-    
-    def count(self, word: str):
-        if word not in self.word_to_ix:
-            raise ValueError(f'Tag: {word} is not in word_to_ix dictionary keys')
-        word_ix = self.word_to_ix[word]
-        count_word = 0
-        for sentence, _ in self.data:
-            count_word += torch.sum(sentence == word_ix).item()
-        return count_word
+        if not case_sensitive:
+            self.word_to_ix = {word.lower(): index for word, index in word_to_ix.items()}
+            self.pad = self.pad.lower()
+            self.unk = self.unk.lower()
+        self.data = self.prepare_dataset(deepcopy(data), self.tag_to_ix, self.word_to_ix)
 
     def __getitem__(self, index):
         sentence, tags = self.data[index]
@@ -46,43 +27,74 @@ class CustomDataset(Dataset):
     def __len__(self):
         return len(self.data)
 
+    def prepare_dataset(self, data, tag_to_ix, word_to_ix):
+        max_len = len(max(data, key=lambda x: len(x[0]))[0])
+        for index, (sentence, tags) in enumerate(data):
+            if not self.case_sensitive:
+                sentence = [word.lower() for word in sentence]
+            sentence = [word_to_ix[word] if word in word_to_ix else word_to_ix[self.unk] for word in sentence]
+            tags = [tag_to_ix[tag] for tag in tags]
 
-def train(model, optimizer, dataloaders, device, num_epochs, output_dir, tqdm=None, verbose=True):
+            sentence.extend([word_to_ix[self.pad]] * (max_len - len(sentence)))
+            tags.extend([-1] * (max_len - len(tags)))
+
+            data[index] = (
+                torch.LongTensor(sentence),
+                torch.LongTensor(tags)
+            )
+        return data
+    
+    def count(self, word: str):
+        if not self.case_sensitive:
+            word = word.lower()
+        if word not in self.word_to_ix:
+            raise ValueError(f'Tag: {word} is not in word_to_ix dictionary keys')
+        word_ix = self.word_to_ix[word]
+        count_word = 0
+        for sentence, _ in self.data:
+            count_word += torch.sum(sentence == word_ix).item()
+        return count_word
+
+
+def train(model, optimizer, dataloaders, device, num_epochs, output_dir, scheduler=None, tqdm=None, verbose=True):
     losses = {'train': [], 'val': []}
     best_loss = None
 
     for epoch in range(1, num_epochs + 1) if tqdm is None else tqdm(range(1, num_epochs + 1)):
-        losses_per_batch = {'train': 0.0, 'val': 0.0}
+        losses_per_epoch = {'train': 0.0, 'val': 0.0}
 
         model.train()
         for x_batch, y_batch, mask_batch in dataloaders['train']:
             x_batch, y_batch, mask_batch = x_batch.to(device), y_batch.to(device), mask_batch.to(device)
             optimizer.zero_grad()
-            loss = model.neg_log_likehood(x_batch, y_batch, mask_batch)
+            loss = model.neg_log_likelihood(x_batch, y_batch, mask_batch)
             loss.backward()
             optimizer.step()
-            losses_per_batch['train'] += loss.item()
+            losses_per_epoch['train'] += loss.item()
 
         model.eval()
         with torch.no_grad():
             for x_batch, y_batch, mask_batch in dataloaders['val']:
                 x_batch, y_batch, mask_batch = x_batch.to(device), y_batch.to(device), mask_batch.to(device)
-                loss = model.neg_log_likehood(x_batch, y_batch, mask_batch)
-                losses_per_batch['val'] += loss.item()
+                loss = model.neg_log_likelihood(x_batch, y_batch, mask_batch)
+                losses_per_epoch['val'] += loss.item()
 
         for mode in ['train', 'val']:
-            losses_per_batch[mode] /= len(dataloaders[mode].dataset)
-            losses[mode].append(losses_per_batch[mode])
+            losses_per_epoch[mode] /= len(dataloaders[mode])
+            losses[mode].append(losses_per_epoch[mode])
 
-        if best_loss is None or best_loss > losses_per_batch['val']:
-            best_loss = losses_per_batch['val']
+        if best_loss is None or best_loss > losses_per_epoch['val']:
+            best_loss = losses_per_epoch['val']
             torch.save(model.state_dict(), os.path.join(output_dir, 'model.pth'))
+
+        if scheduler is not None:
+            scheduler.step(losses_per_epoch['val'])
 
         if verbose:
             print(
                 'Epoch: {}'.format(epoch),
-                'train_loss: {}'.format(losses_per_batch['train']),
-                'val_loss: {}'.format(losses_per_batch['val']),
+                'train_loss: {}'.format(losses_per_epoch['train']),
+                'val_loss: {}'.format(losses_per_epoch['val']),
                 sep=', '
             )
 

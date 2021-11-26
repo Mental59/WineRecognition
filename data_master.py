@@ -1,6 +1,7 @@
 import os
 import sys
-from typing import Dict
+from typing import Dict, Tuple
+from random import choice
 from tqdm import tqdm
 import re
 import pandas as pd
@@ -8,6 +9,55 @@ import random
 import string
 import matplotlib.pyplot as plt
 from matplotlib import style
+
+
+class ComplexGenerator:
+    def __iter__(self):
+        raise NotImplementedError
+
+
+class ComplexGeneratorMenu(ComplexGenerator):
+    def __init__(self, cfg):
+        self.cfg = cfg
+
+    def __iter__(self):
+        for column_name, prob, prepr_func, values in self.cfg:
+            if prob > random.random():
+                yield column_name, prepr_func, values
+
+
+class ComplexGeneratorMain(ComplexGenerator):
+    """class for generating columns with given cfg, which contains probabilities"""
+
+    def __init__(self, cfg: Dict[str, Tuple[str, float]]):
+        self.cfg = cfg
+        self.packs = [
+            [cfg['producer'], cfg['brand']],
+            [cfg['keywordTrue'], cfg['keywordFalse'], cfg['grape'], cfg['region']],
+            [cfg['type'], cfg['color'], cfg['sweetness'], cfg['closure'], cfg['bottleSize']],
+            [cfg['certificate'], cfg['price']],
+        ]
+
+    def __generate_keys(self):
+        keys = []
+
+        for i in 1, 2:
+            random.shuffle(self.packs[i])
+
+        for pack in self.packs:
+            keys.extend(pack)
+
+        if random.random() < 0.5:
+            keys.insert(-1, self.cfg['vintage'])
+        else:
+            keys.insert(0, self.cfg['vintage'])
+
+        return keys
+
+    def __iter__(self):
+        for col, chance in self.__generate_keys():
+            if chance > random.random():
+                yield col
 
 
 class DataLoader:
@@ -155,23 +205,20 @@ class DataGenerator:
     )
 
     @staticmethod
-    def __process_entry(row, column, write_labels: bool) -> str:
-
+    def __process_entry(row, column, write_labels: bool, prepr_func=None) -> str:
         res = []
-
         for word in row.split():
-
             word_processed = False
-
             for symbol in word:
                 if symbol in string.punctuation:
                     res.append(f'{symbol} Punctuation\n' if write_labels else f'{symbol}\n')
                 else:
                     break
-
             word_removed_punctuations = DataGenerator.regex.sub('', word)
 
             if word_removed_punctuations:
+                if prepr_func is not None:
+                    word_removed_punctuations = prepr_func(word_removed_punctuations)
                 res.append(
                     f'{word_removed_punctuations} {column}\n' if write_labels
                     else f'{word_removed_punctuations}\n'
@@ -184,7 +231,6 @@ class DataGenerator:
                         res.append(f'{symbol} Punctuation\n' if write_labels else f'{symbol}\n')
                     else:
                         break
-
         return ''.join(res)
 
     @staticmethod
@@ -192,24 +238,23 @@ class DataGenerator:
         r = re.compile(
             r'(^[%s]*)|([%s]*$)' % (';,', ';,')
         )
-
         res = []
-        for _, row in data.iterrows():
+        for _, row in tqdm(data.iterrows()):
             for column in filter(lambda key: key in data.columns, keys):
-
+                if pd.isna(row[column]):
+                    continue
                 row_column = r.sub('', str(row[column]))
-
                 if row_column:
                     res.append(DataGenerator.__process_entry(row_column, column, write_labels))
             res.append('\n')
-
         return ''.join(res)
 
     @staticmethod
-    def generate_data_text_complex(data: pd.DataFrame, complex_generator, write_labels=True) -> str:
+    def generate_data_text_complex(data: pd.DataFrame, complex_generator: ComplexGeneratorMain,
+                                   write_labels=True) -> str:
         """
         :param data: pandas DataFrame
-        :param complex_generator: iterable object which returns column of provided data
+        :param complex_generator: iterable object which returns columns of provided data
         :param write_labels: write labels or not
         :return: string
         """
@@ -218,18 +263,47 @@ class DataGenerator:
             r'(^[%s]*)|([%s]*$)' % (';,', ';,')
         )
         res = []
-        for _, row in data.iterrows():
+        for _, row in tqdm(data.iterrows()):
             for column in complex_generator:
-
+                if pd.isna(row[column]):
+                    continue
                 row_column = r.sub(
                     '',
                     str(row[column])
                 )
-
                 if row_column:
                     res.append(DataGenerator.__process_entry(row_column, column, write_labels))
             res.append('\n')
+        return ''.join(res)
 
+    @staticmethod
+    def generate_data_text_menu(data: pd.DataFrame, complex_generator: ComplexGeneratorMenu,
+                                write_labels=True) -> str:
+        """
+        :param data: pandas DataFrame
+        :param complex_generator: iterable object which returns columns of provided data
+        :param write_labels: write labels or not
+        :return: string
+        """
+
+        r = re.compile(
+            r'(^[%s]*)|([%s]*$)' % (';,', ';,')
+        )
+        res = []
+        for _, row in tqdm(data.iterrows()):
+            for column, prepr_func, values in complex_generator:
+                if values is not None:
+                    res.append(f'{choice(values)} {column}\n')
+                else:
+                    if pd.isna(row[column]):
+                        continue
+                    row_column = r.sub(
+                        '',
+                        str(row[column])
+                    )
+                    if row_column:
+                        res.append(DataGenerator.__process_entry(row_column, column, write_labels, prepr_func))
+            res.append('\n')
         return ''.join(res)
 
     @staticmethod
@@ -275,40 +349,6 @@ class DataSaver:
                 frequency_dictionary[key].sort_values(by='count', inplace=True, ascending=False)
                 frequency_dictionary[key].to_excel(writer, sheet_name=key)
                 frequency_dictionary[key].to_csv(os.path.join(csv_folder, f'{key}.csv'), index=False)
-
-
-class ComplexGenerator:
-    """class for generating columns with given cfg, which containes probabilities"""
-
-    def __init__(self, cfg):
-        self.cfg = cfg
-        self.packs = [
-            [cfg['producer'], cfg['brand']],
-            [cfg['keywordTrue'], cfg['keywordFalse'], cfg['grape'], cfg['region']],
-            [cfg['type'], cfg['color'], cfg['sweetness'], cfg['closure'], cfg['bottleSize']],
-            [cfg['certificate'], cfg['price']],
-        ]
-
-    def __generate_keys(self):
-        keys = []
-
-        for i in 1, 2:
-            random.shuffle(self.packs[i])
-
-        for pack in self.packs:
-            keys.extend(pack)
-
-        if random.random() < 0.5:
-            keys.insert(-1, self.cfg['vintage'])
-        else:
-            keys.insert(0, self.cfg['vintage'])
-
-        return keys
-
-    def __iter__(self):
-        for col, chance in self.__generate_keys():
-            if chance > random.random():
-                yield col
 
 
 class DataAnalyzer:

@@ -25,7 +25,7 @@ class BiLSTM_CRF(nn.Module):
         x, _ = self.lstm(x)
         return x
 
-    def neg_log_likehood(
+    def neg_log_likelihood(
             self,
             x: torch.Tensor,
             tags: torch.LongTensor,
@@ -79,7 +79,7 @@ def main():
         [2, 2, 3, 4, 4],
         [1, 2, 1, 3, 4],
     ])
-    output = model.neg_log_likehood(input, tags)
+    output = model.neg_log_likelihood(input, tags)
     print(output)
 
 
