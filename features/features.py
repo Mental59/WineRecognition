@@ -1,5 +1,6 @@
 import re
 import json
+import numpy as np
 
 
 data_info = json.load(open(r"G:\PythonProjects\WineRecognition2\data_info.json"))
@@ -95,3 +96,9 @@ def sent2labels(sent):
 
 def sent2tokens(sent):
     return [token for token, label in sent]
+
+
+def get_model_confidence(model, X_test) -> list:
+    marginals = model.predict_marginals(X_test)
+    confs = [np.mean([max(d.values()) for d in marginal]) for marginal in marginals]
+    return confs

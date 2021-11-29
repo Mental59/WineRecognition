@@ -4,7 +4,7 @@ import json
 import pandas as pd
 from data_master import DataGenerator, DataLoader, ComplexGeneratorMain, ComplexGeneratorMenu
 
-OUTPUT_PATH = r'G:\PythonProjects\WineRecognition2\data\text\halliday_winesearcher_menu_gen_samples'
+OUTPUT_PATH = r'G:\PythonProjects\WineRecognition2\data\text\halliday_winesearcher_menu_gen_samplesv2'
 HALLIDAY_PATH = r'G:\PythonProjects\WineRecognition2\data\csv\Halliday_Wine_AU-only_completed_rows.csv'
 WINESEARCHER_PATH = r'G:\PythonProjects\WineRecognition2\data\csv\WineSearcher_Wine_AU-only_completed_rows.csv'
 PERCENT = 0.05  # percent of each menu in final dataset
@@ -55,7 +55,7 @@ def main():
             cfg_value('Add_TradeName'),
             cfg_value('Add_GrapeVarieties'),
             cfg_value('Punctuation', values=['-']),
-            cfg_value('Add_KeyWordFalse', values=['Glass', 'Bottle'])
+            cfg_value('Other', values=['Glass', 'Bottle'])
         ],
         [
             cfg_value('Add_Vintage'),

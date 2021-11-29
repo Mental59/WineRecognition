@@ -1,7 +1,9 @@
 import os
 import sys
+from collections import Counter
 from typing import Dict, Tuple
 from random import choice
+
 from tqdm import tqdm
 import re
 import pandas as pd
@@ -318,8 +320,9 @@ class DataGenerator:
                 continue
 
             example.append(tuple(line.split()[:2]))
-
-        return sents[:-1]
+        if not sents[-1]:
+            sents.pop(-1)
+        return sents
 
     @staticmethod
     def generate_sents2(lines: list):
@@ -336,7 +339,9 @@ class DataGenerator:
             sentences.append(sentence)
             tags.append(tag)
 
-        return sents[:-1]
+        if not sents[-1][0]:
+            sents.pop(-1)
+        return sents
 
 
 class DataSaver:
@@ -488,3 +493,23 @@ class DataAnalyzer:
             df_actual.to_excel(writer, sheet_name='actual')
 
         plt.savefig(diagram_save_path)
+
+
+def count_unk_foreach_tag(X_test, y_true, classes, unk_index):
+    unk_counter = Counter()
+    word_counter = Counter()
+
+    for sentence, tags in zip(X_test, y_true):
+        for word_ix, tag in zip(sentence, tags):
+            word_counter[tag] += 1
+            if word_ix == unk_index:
+                unk_counter[tag] += 1
+
+    res = dict(unk_counter)
+    for tag in set(classes + list(res.keys())):
+        if tag not in res:
+            res[tag] = 0
+        else:
+            res[tag] /= word_counter[tag]
+
+    return res

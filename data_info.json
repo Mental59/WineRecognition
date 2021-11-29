@@ -9,7 +9,9 @@
       "Add_WineType",
       "Add_WineColor",
       "Add_Vintage",
-      "Add_Price"
+      "Add_Price",
+      "Punctuation",
+      "Other"
     ],
     "all": [
       "Add_TradeName",
@@ -25,7 +27,9 @@
       "Add_ClosureType",
       "Add_Certificate",
       "Add_Vintage",
-      "Add_Price"
+      "Add_Price",
+      "Punctuation",
+      "Other"
     ],
     "without_add": [
       "TradeName",

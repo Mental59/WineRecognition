@@ -1,5 +1,9 @@
 import os
+from typing import List
+from collections import Counter
+
 import torch
+from torch import nn
 from torch.utils.data import Dataset
 from matplotlib import pyplot as plt
 from copy import deepcopy
@@ -123,3 +127,17 @@ def generate_tag_to_ix(keys: list):
         tag_to_ix[key] = i
         i += 1
     return tag_to_ix
+
+
+def get_model_confidence(model: nn.Module, X_test: List[torch.Tensor], device) -> List[float]:
+    """Computes model's confidence for each sentence in X_test"""
+    confs = []
+    with torch.no_grad():
+        for sentence in X_test:
+            sentence = sentence.unsqueeze(0).to(device)
+            best_tag_sequence = model(sentence)
+            confidence = torch.exp(
+                -model.neg_log_likelihood(sentence, torch.tensor(best_tag_sequence, device=device))
+            )
+            confs.append(confidence.item())
+    return confs
