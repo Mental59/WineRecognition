@@ -96,9 +96,3 @@ def sent2labels(sent):
 
 def sent2tokens(sent):
     return [token for token, label in sent]
-
-
-def get_model_confidence(model, X_test) -> list:
-    marginals = model.predict_marginals(X_test)
-    confs = [np.mean([max(d.values()) for d in marginal]) for marginal in marginals]
-    return confs

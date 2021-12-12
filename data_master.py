@@ -3,6 +3,7 @@ import sys
 from collections import Counter
 from typing import Dict, Tuple
 from random import choice
+import json
 
 from tqdm import tqdm
 import re
@@ -10,6 +11,7 @@ import pandas as pd
 import random
 import string
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib import style
 
 
@@ -343,6 +345,19 @@ class DataGenerator:
             sents.pop(-1)
         return sents
 
+    @staticmethod
+    def generate_probability_table(marginals, sents) -> pd.DataFrame:
+        """Generates probability table from marginals for each word"""
+        df = pd.DataFrame(marginals).applymap(
+            lambda d: sorted(d.items(), key=lambda x: x[1], reverse=True) if d is not None else None
+        ).applymap(
+            lambda l: [(x[0], round(x[1], 4)) for x in l] if l is not None else None
+        )
+        for (i, df_row), (x_row, _) in zip(df.iterrows(), sents):
+            for j, word in enumerate(x_row):
+                df.iloc[i, j] = json.dumps({word: df.iloc[i, j]})
+        return df
+
 
 class DataSaver:
     """class for saving generated data structures"""
@@ -360,7 +375,7 @@ class DataAnalyzer:
     """Class for analyzing results"""
 
     @staticmethod
-    def analyze(test_eval, keys, table_save_path, diagram_save_path):
+    def analyze(test_eval, keys, table_save_path, diagram_save_path, prob_table=None):
         """
         Creates colored table and save it on path "table_save_path" (.xlsx)
         Creates bar chart and save it on path "diagram_save_path" (.png)
@@ -491,6 +506,8 @@ class DataAnalyzer:
         with pd.ExcelWriter(table_save_path, engine='xlsxwriter') as writer:
             colored_predicted.to_excel(writer, sheet_name='predicted')
             df_actual.to_excel(writer, sheet_name='actual')
+            if prob_table is not None:
+                prob_table.to_excel(writer, sheet_name='probabilities')
 
         plt.savefig(diagram_save_path)
 
@@ -513,3 +530,7 @@ def count_unk_foreach_tag(X_test, y_true, classes, unk_index):
             res[tag] /= word_counter[tag]
 
     return res
+
+
+def compute_model_confidence(marginals) -> list:
+    return [np.mean([max(d.values()) for d in marginal]) for marginal in marginals]

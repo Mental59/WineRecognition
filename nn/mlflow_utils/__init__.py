@@ -64,6 +64,8 @@ def log_mlflow_on_test(run_params, classes, x_test, y_pred, y_true):
             file.write(' '.join(f) % tuple(tags) + '\n')
             file.write(' '.join(f) % tuple(sentence) + '\n')
 
+    mlflow.set_experiment(exp_settings['experiment'])
+
     with mlflow.start_run(run_name=run_params['run_name']):
         if run_params['compute_metrics']:
             mlflow.log_metrics({
@@ -94,7 +96,8 @@ def log_mlflow_on_test(run_params, classes, x_test, y_pred, y_true):
                 output = [' '.join(word for word, tag in zip(sentence, tags) if tag == cls) for cls in classes]
                 df.append(output)
 
-            pd.DataFrame(df, columns=classes).to_excel('{}/results.xlsx'.format(run_params['output_dir']))
+            with pd.ExcelWriter('{}/results.xlsx'.format(run_params['output_dir']), engine='xlsxwriter') as writer:
+                pd.DataFrame(df, columns=classes).to_excel(writer, sheet_name='results')
 
         unk_foreach_tag = run_params.pop('unk_foreach_tag', None)
         if unk_foreach_tag is not None:
