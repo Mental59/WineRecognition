@@ -1,15 +1,8 @@
 import re
-import json
-import numpy as np
+from typing import Callable
 
 
-data_info = json.load(open(r"G:\PythonProjects\WineRecognition2\data_info.json"))
-
-NUMBER_KEYS = data_info['keys']['numerical']
-WORD_KEYS = data_info['keys']['string']
-
-
-def isnumber(word):
+def isnumber(word: str):
     try:
         float(word)
         return True
@@ -17,26 +10,26 @@ def isnumber(word):
         return False
 
 
-def getprob(freq_dict, key, word):
+def getprob(freq_dict, key: str, word: str) -> float:
     try:
         return float(freq_dict[key].loc[freq_dict[key]['value'].str.lower() == word.lower()].iloc[0]['frequency'])
     except IndexError:
         return 0.0
 
 
-def getprob_binary(freq_dict, key, word):
-    return bool(len(freq_dict[key].loc[freq_dict[key]['value'].str.lower() == word.lower()]))
+def getprob_binary(freq_dict, key, word) -> bool:
+    dict_key_value = freq_dict[key]['value']
+    return not dict_key_value.loc[dict_key_value == word.lower()].empty
 
 
-def calculate_probs(words: str, isnumber: bool, prob_func, freq_dict):
-    probs = dict.fromkeys(NUMBER_KEYS + WORD_KEYS, 0.0)
+def calculate_probs(word: str, prob_func: Callable, freq_dict):
+    probs = dict.fromkeys(freq_dict.keys(), 0.0)
 
-    for key in NUMBER_KEYS if isnumber else WORD_KEYS:
-        prob = prob_func(freq_dict, key, str(float(words))) if key == 'Add_BottleSize' else \
-            prob_func(freq_dict, key, words)
+    for key in freq_dict:
+        prob = prob_func(freq_dict, key, word)
 
-        if re.match(r"[`']", words) and prob == 0.0:
-            prob = prob_func(freq_dict, key, re.sub(r"[`']", "", words))
+        if re.match(r"[`']", word) and not prob:
+            prob = prob_func(freq_dict, key, re.sub(r"[`']", "", word))
 
         probs[key] = prob
 
@@ -55,32 +48,30 @@ def word2features(sent, i: int, freq_dict):
         'isNumber(word)': is_number
     }
 
-    probs = calculate_probs(word, is_number, getprob_binary, freq_dict)
+    probs = calculate_probs(word, getprob_binary, freq_dict)
     for key in probs:
         features[key] = probs[key]
 
     if i > 0:
         word1, label1 = sent[i - 1]
 
-        probs1 = calculate_probs(f'{word1} {word}', False, getprob_binary, freq_dict)
+        probs1 = calculate_probs(f'{word1} {word}', getprob_binary, freq_dict)
         for key in probs1:
             features[f'-1:BGram.{key}'] = probs1[key]
 
         features.update({
-            '-1:word.lower()': word1.lower(),
-            '-1:word.label': label1,
+            '-1:word.lower()': word1.lower()
         })
 
     if i < len(sent) - 1:
         word1, label1 = sent[i + 1]
 
-        probs1 = calculate_probs(f'{word} {word1}', False, getprob_binary, freq_dict)
+        probs1 = calculate_probs(f'{word} {word1}', getprob_binary, freq_dict)
         for key in probs1:
             features[f'+1:BGram.{key}'] = probs1[key]
 
         features.update({
-            '+1:word.lower()': word1.lower(),
-            '+1:word.label': label1,
+            '+1:word.lower()': word1.lower()
         })
 
     return features
@@ -96,3 +87,17 @@ def sent2labels(sent):
 
 def sent2tokens(sent):
     return [token for token, label in sent]
+
+
+if __name__ == '__main__':
+    from data_master import DataLoader
+    import time
+    freq_dict = DataLoader.load_frequency_dictionary(
+        r'G:\PythonProjects\WineRecognition2\data\dictionaries\Dict-byword_Halliday_Winesearcher_Wine_AU-only_completed_rows',
+        to_lowercase=True
+    )
+
+    elapsed = time.time()
+    print(getprob_binary(freq_dict, 'Add_Brand', 'the'))
+    elapsed = time.time() - elapsed
+    print(elapsed)

@@ -68,13 +68,15 @@ class DataLoader:
     """class for loading data with needed format"""
 
     @staticmethod
-    def load_frequency_dictionary(path: str) -> Dict:
+    def load_frequency_dictionary(path: str, to_lowercase=False) -> Dict:
         freq_dict = {}
 
         for filename in os.listdir(path):
             key = os.path.splitext(filename)[0]
             freq_dict[key] = pd.read_csv(f'{os.path.join(path, filename)}', dtype=object)
             freq_dict[key].fillna('', inplace=True)
+            if to_lowercase:
+                freq_dict[key]['value'] = freq_dict[key]['value'].str.lower()
 
         return freq_dict
 
