@@ -1,21 +1,38 @@
 import os
+import re
 from typing import List, Dict
-from collections import Counter
-from copy import deepcopy
 
 import pandas as pd
 import torch
 from torch import nn
 from torch.utils.data import Dataset
 from matplotlib import pyplot as plt
+from num2words import num2words
 
 from features import features
 
 
 class CustomDataset(Dataset):
-    def __init__(self, data, tag_to_ix, word_to_ix, freq_dict: Dict[str, pd.DataFrame] = None, case_sensitive=True):
+    """
+    CustomDataset
+    returns sentence, tags, mask, custom_features if freq_dict was provided
+    """
+
+    num_regex = re.compile(r"^\d+(\.\d+)?$")
+
+    def __init__(
+            self,
+            data,
+            tag_to_ix,
+            word_to_ix,
+            freq_dict: Dict[str, pd.DataFrame] = None,
+            case_sensitive=True,
+            prepare_dataset=True,
+            convert_nums2words=False
+    ):
         super(CustomDataset, self).__init__()
         self.case_sensitive = case_sensitive
+        self.convert_nums2words = convert_nums2words
         self.pad = 'PAD'
         self.unk = 'UNK'
         self.word_to_ix = word_to_ix
@@ -26,9 +43,10 @@ class CustomDataset(Dataset):
             self.word_to_ix = {word.lower(): index for word, index in word_to_ix.items()}
             self.pad = self.pad.lower()
             self.unk = self.unk.lower()
-        self.data = self.prepare_dataset(deepcopy(data), self.tag_to_ix, self.word_to_ix)
+        self.raw_data_cached = list(self.compute_raw_data(data))
+        self.data = self.prepare_dataset() if prepare_dataset else None
         if self.freq_dict is not None:
-            self.custom_features = self.compute_custom_features(deepcopy(data))
+            self.custom_features = self.compute_custom_features()
 
     def __getitem__(self, index):
         sentence, tags = self.data[index]
@@ -40,22 +58,59 @@ class CustomDataset(Dataset):
     def __len__(self):
         return len(self.data)
 
-    def prepare_dataset(self, data, tag_to_ix, word_to_ix):
-        max_len = self.compute_max_sentence_len(data)
-        for index, (sentence, tags) in enumerate(data):
-            if not self.case_sensitive:
-                sentence = [word.lower() for word in sentence]
-            sentence = [word_to_ix[word] if word in word_to_ix else word_to_ix[self.unk] for word in sentence]
-            tags = [tag_to_ix[tag] for tag in tags]
+    def prepare_dataset(self):
+        prepared_data = []
+        max_len = self.compute_max_sentence_len(self.raw_data_cached)
+        for sentence, tags in self.raw_data_cached:
+            sentence = self.sentence_to_indices(sentence)
+            tags = self.tags_to_indices(tags)
 
-            sentence.extend([word_to_ix[self.pad]] * (max_len - len(sentence)))
+            sentence.extend([self.word_to_ix[self.pad]] * (max_len - len(sentence)))
             tags.extend([-1] * (max_len - len(tags)))
 
-            data[index] = (
-                torch.LongTensor(sentence),
-                torch.LongTensor(tags)
+            prepared_data.append(
+                (torch.LongTensor(sentence), torch.LongTensor(tags))
             )
-        return data
+        return prepared_data
+
+    def sentence_to_indices(self, sentence):
+        return [
+            self.word_to_ix[word] if word in self.word_to_ix else self.word_to_ix[self.unk] for word in sentence
+        ]
+
+    def tags_to_indices(self, tags):
+        return [self.tag_to_ix[tag] for tag in tags]
+
+    def compute_raw_data(self, data):
+        for sentence, tags in data:
+            if not self.case_sensitive:
+                sentence = [word.lower() for word in sentence]
+
+            if self.convert_nums2words:
+                new_sentence = []
+                new_tags = []
+
+                for index, (word, tag) in enumerate(zip(sentence, tags)):
+                    if CustomDataset.num_regex.match(word):
+                        words = (
+                            num2words(word)
+                            .replace('-', ' ')
+                            .replace(',', '')
+                            .split()
+                        )
+                        new_sentence.extend(words)
+                        new_tags.extend([tag] * len(words))
+                    else:
+                        new_sentence.append(word)
+                        new_tags.append(tag)
+
+                sentence = new_sentence
+                tags = new_tags
+
+            yield sentence, tags
+
+    def raw_data(self):
+        return self.raw_data_cached
 
     @staticmethod
     def compute_max_sentence_len(data):
@@ -93,10 +148,10 @@ class CustomDataset(Dataset):
 
         return result
 
-    def compute_custom_features(self, data) -> List[torch.Tensor]:
+    def compute_custom_features(self) -> List[torch.Tensor]:
         custom_features = []
-        max_len = self.compute_max_sentence_len(data)
-        for index, (sentence, tags) in enumerate(data):
+        max_len = self.compute_max_sentence_len(self.raw_data_cached)
+        for index, (sentence, tags) in enumerate(self.raw_data_cached):
             n = len(sentence)
             word_features = [self.word2features(sentence, i, n) for i in range(n)]
             pad_features = [[0] * len(word_features[0]) for _ in range(max_len - n)]

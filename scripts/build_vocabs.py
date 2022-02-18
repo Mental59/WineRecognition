@@ -28,6 +28,15 @@ dictionary_paths_vocab_names = [
 
 regex = re.compile(r'(^[%s]*)|([%s]*$)' % (re.escape(string.punctuation), re.escape(string.punctuation)))
 
+num_words = [
+    'and', 'eight', 'eighteen', 'eighty', 'eleven',
+    'fifteen', 'fifty', 'five', 'forty', 'four', 'fourteen', 'hundred',
+    'nine', 'nineteen', 'ninety', 'one', 'seven', 'seventeen',
+    'seventy', 'six', 'sixteen', 'sixty', 'ten', 'thirteen',
+    'thirty', 'thousand', 'thousand,', 'three', 'twelve',
+    'twenty', 'two', 'zero', 'million'
+]
+
 for dictionary_path, vocab_name in dictionary_paths_vocab_names:
 
     DICT = DataLoader.load_frequency_dictionary(dictionary_path)
@@ -52,6 +61,14 @@ for dictionary_path, vocab_name in dictionary_paths_vocab_names:
         i += 1
 
     with open(os.path.join('G:/PythonProjects/WineRecognition2/data/vocabs/', f'{vocab_name}.json'), 'w', encoding='utf-8') as file:
+        json.dump(vocab, file)
+
+    for w in num_words:
+        if w not in vocab:
+            vocab[w] = i
+            i += 1
+
+    with open(os.path.join('G:/PythonProjects/WineRecognition2/data/vocabs/', f'{vocab_name}_WORD_NUMS.json'), 'w', encoding='utf-8') as file:
         json.dump(vocab, file)
 
     print('Vocab length:', len(vocab))

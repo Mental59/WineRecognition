@@ -136,6 +136,10 @@ class DataLoader:
 class DataGenerator:
     """class for generating data structures"""
 
+    regex = re.compile(
+        r'(^[%s]*)|([%s]*$)' % (re.escape(string.punctuation), re.escape(string.punctuation))
+    )
+
     @staticmethod
     def generate_freq_dict(*data: pd.DataFrame, keys: list, byword=False) -> Dict:
 
@@ -190,10 +194,9 @@ class DataGenerator:
                     )
 
                     val_split = val.split()
-
                     if byword and len(val_split) > 1:
-
                         for word in val_split:
+                            word = DataGenerator.regex.sub('', word)
                             add_value(
                                 freq_dict=frequency_dictionary,
                                 key=key,
@@ -205,10 +208,6 @@ class DataGenerator:
             frequency_dictionary[key] = pd.DataFrame(frequency_dictionary[key])
 
         return frequency_dictionary
-
-    regex = re.compile(
-        r'(^[%s]*)|([%s]*$)' % (re.escape(string.punctuation), re.escape(string.punctuation))
-    )
 
     @staticmethod
     def __process_entry(row, column, write_labels: bool, prepr_func=None) -> str:

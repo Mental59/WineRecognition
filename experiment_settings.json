@@ -1,4 +1,4 @@
 {
-  "experiment": "CRF_with_LSTM_features+Our_features",
+  "experiment": "CRF_with_LSTM_features+Our_features_NUM2WORDS",
   "artifacts_path": "G:/PythonProjects/WineRecognition2/artifacts"
 }

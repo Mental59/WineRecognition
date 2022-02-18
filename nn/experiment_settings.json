@@ -1,4 +1,4 @@
 {
-  "experiment": "BiLSTM_CRF-Halliday-WineSearcher-MenuGenSamples-OtherTag",
+  "experiment": "BiLSTM_CRF-Halliday-WineSearcher-MenuGenSamples-OtherTag-NUM2WORDS",
   "artifacts_path": "G:/PythonProjects/WineRecognition2/artifacts"
 }
