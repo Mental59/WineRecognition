@@ -169,7 +169,7 @@ def main():
             CfgValue('Other', values=['Glass', 'Bottle'])
         ],
         [
-            CfgValue('Add_TradeName'),
+            CfgValue('Add_Brand'),
             CfgValue('Add_GrapeVarieties'),
             CfgValue('Punctuation', values=['-']),
             CfgValue('Other', values=['Glass', 'Bottle'])
