@@ -4,6 +4,14 @@ import json
 import argparse
 
 
+current_dir = os.path.dirname(os.path.abspath(__file__))
+upper_dir = os.path.split(current_dir)[0]
+if upper_dir not in sys.path:
+    sys.path.insert(0, upper_dir)
+
+
+from data_master import DataGenerator, DataLoader, ComplexGeneratorMain
+
 """
 python .\scripts\generate_text_data.py -c -l .\data\csv\Halliday_Wine_AU-only_completed_rows-all_columns.csv ./data/text/Halliday_Wine_AU-only_completed_rows-complex.txt
 python .\scripts\generate_text_data.py -l -k all .\data\csv\Halliday_Wine_AU-only_completed_rows-all_columns.csv ./data/text/Halliday_Wine_AU-only_completed_rows-all_keys.txt
@@ -15,15 +23,6 @@ python .\scripts\generate_text_data.py -l -k all .\data\csv\WineSearcher_Wine_AU
 python .\scripts\generate_text_data.py -l -k origin_full_name .\data\csv\WineSearcher_Wine_AU-only_completed_rows-all_columns.csv ./data/text/WineSearcher_Wine_AU-only_completed_rows-origin_fullname.txt
 
 """
-
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
-upper_dir = os.path.split(current_dir)[0]
-if upper_dir not in sys.path:
-    sys.path.insert(0, upper_dir)
-
-
-from data_master import DataGenerator, DataLoader, ComplexGeneratorMain
 
 
 parser = argparse.ArgumentParser()

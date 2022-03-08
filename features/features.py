@@ -89,6 +89,18 @@ def sent2tokens(sent):
     return [token for token, label in sent]
 
 
+def sent2features_generator(sent, freq_dict):
+    return (word2features(sent, i, freq_dict) for i in range(len(sent)))
+
+
+def sent2labels_generator(sent):
+    return (label for token, label in sent)
+
+
+def sent2tokens_generator(sent):
+    return (token for token, label in sent)
+
+
 if __name__ == '__main__':
     from data_master import DataLoader
     import time

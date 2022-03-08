@@ -3,21 +3,20 @@ import sys
 import argparse
 
 
+current_dir = os.path.dirname(os.path.abspath(__file__))
+upper_dir = os.path.split(current_dir)[0]
+if upper_dir not in sys.path:
+    sys.path.insert(0, upper_dir)
+
+from data_master import DataLoader
+
+
 """
 python .\scripts\generate_csv_from_excel.py --drop-not-add --fill-bottle-size 750.0 --only-completed-rows .\data\excel\Halliday_Wine_AU.xlsx ./data/csv/Halliday_Wine_AU-only_completed_rows.csv
 python .\scripts\generate_csv_from_excel.py --drop-not-add --fill-bottle-size 750.0 .\data\excel\Halliday_Wine_AU.xlsx ./data/csv/Halliday_Wine_AU-all_rows.csv
 python .\scripts\generate_csv_from_excel.py --drop-not-add --fill-bottle-size 750.0 .\data\excel\WineSearcher_Wine_AU.xlsx ./data/csv/WineSearcher_Wine_AU-all_rows.csv
 python .\scripts\generate_csv_from_excel.py --drop-not-add --fill-bottle-size 750.0 --only-completed-rows  .\data\excel\WineSearcher_Wine_AU.xlsx ./data/csv/WineSearcher_Wine_AU-only_completed_rows.csv
 """
-
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
-upper_dir = os.path.split(current_dir)[0]
-if upper_dir not in sys.path:
-    sys.path.insert(0, upper_dir)
-
-
-from data_master import DataLoader
 
 
 parser = argparse.ArgumentParser()
