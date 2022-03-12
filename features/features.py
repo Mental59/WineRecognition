@@ -12,7 +12,7 @@ def isnumber(word: str):
 
 def getprob(freq_dict, key: str, word: str) -> float:
     try:
-        return float(freq_dict[key].loc[freq_dict[key]['value'].str.lower() == word.lower()].iloc[0]['frequency'])
+        return float(freq_dict[key].loc[freq_dict[key]['value'] == word.lower()].iloc[0]['frequency'])
     except IndexError:
         return 0.0
 
