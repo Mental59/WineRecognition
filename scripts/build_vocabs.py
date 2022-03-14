@@ -23,6 +23,10 @@ dictionary_paths_vocab_names = [
     (
         'G:/PythonProjects/WineRecognition2/data/dictionaries/Dict-byword_Halliday_WineSearcher_Wine_AU-only_completed_rows',
         'Words_Halliday_WineSearcher_Wine_AU'
+    ),
+    (
+        r'G:\PythonProjects\WineRecognition2\data\dictionaries\Dict-byword_Halliday_Winesearcher_Bruxelles',
+        'Words_Halliday_WineSearcher_Bruxelles'
     )
 ]
 

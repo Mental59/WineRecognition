@@ -4,25 +4,27 @@ import json
 import pandas as pd
 from data_master import DataGenerator, DataLoader, ComplexGeneratorMain, ComplexGeneratorMenu, CfgValue
 
-OUTPUT_PATH = r'G:\PythonProjects\WineRecognition2\data\text\halliday_winesearcher_menu_gen_samplesv3'
-HALLIDAY_PATH = r'G:\PythonProjects\WineRecognition2\data\csv\Halliday_Wine_AU-only_completed_rows.csv'
-WINESEARCHER_PATH = r'G:\PythonProjects\WineRecognition2\data\csv\WineSearcher_Wine_AU-only_completed_rows.csv'
-PERCENT = 0.05  # percent of each pattern in final dataset
-
-
-def split_price(price: str):
-    price = price.replace(',', '')
-    divided_price = str(int(float(price) / 5))
-    return divided_price + '/' + str(int(float(price)))
+OUTPUT_PATH = r'G:\PythonProjects\WineRecognition2\data\text\data_and_menu_gen_samples'
+OUTPUT_NAME = 'Halliday_WineSearcher_Bruxelles_MenuGenSamples.txt'
+DATA_PATHS = [
+    r'G:\PythonProjects\WineRecognition2\data\csv\Halliday_Wine_AU-only_completed_rows.csv',
+    r'G:\PythonProjects\WineRecognition2\data\csv\WineSearcher_Wine_AU-only_completed_rows.csv',
+    r'G:\PythonProjects\WineRecognition2\data\csv\Bruxelles_Wine_ES.csv'
+]
+PERCENT = 0.15  # percent of each pattern in final dataset
 
 
 def main():
+    def split_price(price: str):
+        price = price.replace(',', '')
+        divided_price = str(int(float(price) / 5))
+        return divided_price + '/' + str(int(float(price)))
+
     if not exists(OUTPUT_PATH):
         mkdir(OUTPUT_PATH)
     data_info = json.load(open('../data_info.json'))
-    halliday = DataLoader.load_csv_data(HALLIDAY_PATH)
-    winesearcher = DataLoader.load_csv_data(WINESEARCHER_PATH)
-    halliday_winesearcher = pd.concat((halliday, winesearcher))
+    data_sources = [DataLoader.load_csv_data(data_path) for data_path in DATA_PATHS]
+    df = pd.concat(data_sources)
 
     cfgs = [
         # 1 menu
@@ -239,17 +241,20 @@ def main():
         'menu': [ComplexGeneratorMenu(cfg) for cfg in cfgs]
     }
 
-    n_rows = int(len(halliday_winesearcher) * PERCENT)
+    n_rows = int(len(df) * PERCENT)
+    total_number_of_lines = len(df) + n_rows * len(cfgs)
 
-    with open(join(OUTPUT_PATH, 'Halliday_WineSearcher_MenuGenSamples.txt'), 'w', encoding='utf-8') as file:
+    with open(join(OUTPUT_PATH, OUTPUT_NAME), 'w', encoding='utf-8') as file:
         final_dataset = [
-            DataGenerator.generate_data_text_complex(halliday_winesearcher, complex_generators['main'])
+            DataGenerator.generate_data_text_complex(df, complex_generators['main'])
         ]
         for complex_generator in complex_generators['menu']:
             column_names = [value.column for value in complex_generator.cfg if value.values is None]
-            samples = halliday_winesearcher[column_names].dropna().sample(n_rows)
+            samples = df[column_names].dropna().sample(n_rows)
             final_dataset.append(DataGenerator.generate_data_text_menu(samples, complex_generator))
         file.write(''.join(final_dataset))
+
+    print(f'Total number of lines: {total_number_of_lines}')
 
 
 if __name__ == '__main__':

@@ -1,10 +1,11 @@
 {
   "data_paths": [
     "G:/PythonProjects/WineRecognition2/data/csv/Halliday_Wine_AU-only_completed_rows.csv",
-    "G:/PythonProjects/WineRecognition2/data/csv/WineSearcher_Wine_AU-only_completed_rows.csv"
+    "G:/PythonProjects/WineRecognition2/data/csv/WineSearcher_Wine_AU-only_completed_rows.csv",
+    "G:/PythonProjects/WineRecognition2/data/csv/Bruxelles_Wine_ES.csv"
   ],
   "data_info_path": "G:/PythonProjects/WineRecognition2/data_info.json",
-  "output_csv_folder": "G:/PythonProjects/WineRecognition2/data/dictionaries/Dict-byword_Halliday_Winesearcher_Wine_AU-only_completed_rows",
-  "output_excel_path": "G:/PythonProjects/WineRecognition2/data/dictionaries/Dict-byword_Halliday_Winesearcher_Wine_AU-only_completed_rows.xlsx",
+  "output_csv_folder": "G:/PythonProjects/WineRecognition2/data/dictionaries/Dict-byword_Halliday_Winesearcher_Bruxelles",
+  "output_excel_path": "G:/PythonProjects/WineRecognition2/data/dictionaries/Dict-byword_Halliday_Winesearcher_Bruxelles.xlsx",
   "byword": true
 }
