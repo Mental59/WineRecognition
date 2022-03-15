@@ -192,15 +192,14 @@ class DataGenerator:
         sents = []
         example = []
         for line in lines:
-
             if not line:
-                sents.append(example)
-                example = []
+                if example:
+                    sents.append(example)
+                    example = []
                 continue
 
             example.append(tuple(line.split()[:2]))
-        if not sents[-1]:
-            sents.pop(-1)
+
         return sents
 
     @staticmethod
@@ -209,8 +208,9 @@ class DataGenerator:
         sentences, tags = [], []
         for line in lines:
             if not line:
-                sents.append((sentences, tags))
-                sentences, tags = [], []
+                if sentences and tags:
+                    sents.append((sentences, tags))
+                    sentences, tags = [], []
                 continue
 
             sentence, *tag = line.split()
@@ -218,8 +218,6 @@ class DataGenerator:
             sentences.append(sentence)
             tags.append(tag)
 
-        if not sents[-1][0]:
-            sents.pop(-1)
         return sents
 
     @staticmethod
