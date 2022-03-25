@@ -46,10 +46,13 @@ def log_mlflow_on_train(run_params, model, classes, losses, y_true, y_pred, test
 
         plot_losses(losses, figsize=(12, 8), show=False, savepath=os.path.join(run_params['output_dir'], 'losses.png'))
 
+        for train_loss, val_loss in zip(losses['train'], losses['val']):
+            mlflow.log_metrics({
+                'train_loss': train_loss,
+                'val_loss': val_loss
+            })
         mlflow.log_artifacts(run_params['output_dir'])
-
         mlflow.pytorch.log_model(model, f"{run_params['output_dir']}/model")
-
         mlflow.log_params(run_params)
 
 

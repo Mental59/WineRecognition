@@ -5,7 +5,7 @@ import pandas as pd
 from data_master import DataGenerator, DataLoader, ComplexGeneratorMain, ComplexGeneratorMenu, CfgValue
 
 OUTPUT_PATH = r'G:\PythonProjects\WineRecognition2\data\text\data_and_menu_gen_samples'
-OUTPUT_NAME = 'Halliday_WineSearcher_Bruxelles_MenuGenSamples_v2.txt'
+OUTPUT_NAME = 'Halliday_WineSearcher_Bruxelles_MenuGenSamples_v4_BottleSize.txt'
 DATA_PATHS = [
     r'G:\PythonProjects\WineRecognition2\data\csv\Halliday_Wine_AU-only_completed_rows.csv',
     r'G:\PythonProjects\WineRecognition2\data\csv\WineSearcher_Wine_AU-only_completed_rows.csv',
@@ -180,26 +180,26 @@ def main():
             CfgValue(GEO),
             CfgValue(GRAPE),
             CfgValue(PUNCTUATION, values=['-']),
-            CfgValue(OTHER, values=['Glass', 'Bottle'])
+            CfgValue(BOTTLESIZE, values=['Glass', 'Bottle'])
         ],
         [
             CfgValue(BRAND),
             CfgValue(COLOR),
             CfgValue(PUNCTUATION, values=['-']),
-            CfgValue(OTHER, values=['Glass', 'Bottle'])
+            CfgValue(BOTTLESIZE, values=['Glass', 'Bottle'])
         ],
         [
             CfgValue(BRAND),
             CfgValue(GRAPE),
             CfgValue(PUNCTUATION, values=['-']),
-            CfgValue(OTHER, values=['Glass', 'Bottle'])
+            CfgValue(BOTTLESIZE, values=['Glass', 'Bottle'])
         ],
         [
             CfgValue(TRADENAME),
             CfgValue(BRAND),
             CfgValue(GRAPE),
             CfgValue(PUNCTUATION, values=['-']),
-            CfgValue(OTHER, values=['Glass', 'Bottle'])
+            CfgValue(BOTTLESIZE, values=['Glass', 'Bottle'])
         ],
 
         # 5 menu
@@ -260,7 +260,7 @@ def main():
         [
             CfgValue(GRAPE),
             CfgValue(OTHER, values=['-']),
-            CfgValue(OTHER, values=['Bottle']),
+            CfgValue(BOTTLESIZE, values=['Bottle']),
             CfgValue(OTHER, values=['-']),
             CfgValue(OTHER, values=['£']),
             CfgValue(PRICE)
@@ -276,7 +276,7 @@ def main():
         [
             CfgValue(GRAPE),
             CfgValue(COLOR),
-            CfgValue(OTHER, values=['bottle']),
+            CfgValue(BOTTLESIZE, values=['bottle']),
             CfgValue(PRICE)
         ],
 
@@ -295,28 +295,44 @@ def main():
             CfgValue(GEO),
             CfgValue(PRICE)
         ],
-        # [
-        #     CfgValue(BRAND),
-        #     CfgValue(PRICE)
-        # ],
+        [
+            CfgValue(BRAND),
+            CfgValue(PRICE)
+        ],
         [
             CfgValue(BRAND),
             CfgValue(GEO),
             CfgValue(PRICE)
         ],
         [
+            CfgValue(BRAND),
+            CfgValue(OTHER, values=['by', 'of']),
             CfgValue(TRADENAME),
-            CfgValue(SWEETNESS),
-            CfgValue(TYPE, prob=0.1),
             CfgValue(GEO),
             CfgValue(PRICE)
         ],
         [
-            CfgValue(TRADENAME),
-            CfgValue(TYPE),
+            CfgValue(BRAND),
             CfgValue(COLOR),
-            CfgValue(BRAND),
+            CfgValue(OTHER, values=['of']),
+            CfgValue(GRAPE),
             CfgValue(GEO),
+            CfgValue(PRICE)
+        ],
+        [
+            CfgValue(BRAND),
+            CfgValue(KEYWORD_TRUE),
+            CfgValue(GEO),
+            CfgValue(TYPE),
+            CfgValue(PRICE)
+        ],
+        [
+            CfgValue(BRAND),
+            CfgValue(COLOR),
+            CfgValue(OTHER, values=['of']),
+            CfgValue(GRAPE),
+            CfgValue(GEO),
+            CfgValue(TYPE),
             CfgValue(PRICE)
         ],
 
