@@ -67,6 +67,6 @@ class DataLoader:
 
         vintage = 'Add_Vintage'
         if vintage in new_data.columns:
-            new_data.loc[(new_data[vintage] == 'Non Vintage') | (new_data[vintage] == 'Nv'), vintage] = ''
+            new_data.loc[(new_data[vintage] == 'Non Vintage') | (new_data[vintage] == 'Nv'), vintage] = 'nv'
 
         return new_data

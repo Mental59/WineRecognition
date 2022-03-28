@@ -92,7 +92,10 @@ class DataGenerator:
             word_processed = False
             for symbol in word:
                 if symbol in string.punctuation:
-                    res.append(f'{symbol} Punctuation\n' if write_labels else f'{symbol}\n')
+                    if symbol in ['&']:
+                        res.append(f'{symbol} {column}\n' if write_labels else f'{symbol}\n')
+                    else:
+                        res.append(f'{symbol} Punctuation\n' if write_labels else f'{symbol}\n')
                 else:
                     break
             word_removed_punctuations = DataGenerator.regex.sub('', word)

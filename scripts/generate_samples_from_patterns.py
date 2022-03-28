@@ -5,7 +5,7 @@ import pandas as pd
 from data_master import DataGenerator, DataLoader, ComplexGeneratorMain, ComplexGeneratorMenu, CfgValue
 
 OUTPUT_PATH = r'G:\PythonProjects\WineRecognition2\data\text\data_and_menu_gen_samples'
-OUTPUT_NAME = 'Halliday_WineSearcher_Bruxelles_MenuGenSamples_v4_BottleSize.txt'
+OUTPUT_NAME = 'Halliday_WineSearcher_Bruxelles_MenuGenSamples_v5_BottleSize_fixed.txt'
 DATA_PATHS = [
     r'G:\PythonProjects\WineRecognition2\data\csv\Halliday_Wine_AU-only_completed_rows.csv',
     r'G:\PythonProjects\WineRecognition2\data\csv\WineSearcher_Wine_AU-only_completed_rows.csv',
@@ -81,7 +81,7 @@ def main():
             CfgValue(TRADENAME),
             CfgValue(GRAPE),
             CfgValue(GEO),
-            CfgValue(GEO, values=['NV', 'NSW', 'SA', 'VIC'], prob=0.625),
+            CfgValue(GEO, values=['NSW', 'SA', 'VIC'], prob=0.625),
             CfgValue(PRICE, prepr_func=split_price)
         ],
         [
@@ -89,7 +89,7 @@ def main():
             CfgValue(TYPE),
             CfgValue(GRAPE),
             CfgValue(GEO),
-            CfgValue(GEO, values=['NV', 'NSW', 'SA', 'VIC'], prob=0.625),
+            CfgValue(GEO, values=['NSW', 'SA', 'VIC'], prob=0.625),
             CfgValue(PRICE)
         ],
         [
@@ -97,12 +97,12 @@ def main():
             CfgValue(KEYWORD_TRUE),
             CfgValue(COLOR, prob=0.5),
             CfgValue(GEO),
-            CfgValue(GEO, values=['NV', 'NSW', 'SA', 'VIC'], prob=0.625),
+            CfgValue(GEO, values=['NSW', 'SA', 'VIC'], prob=0.625),
             CfgValue(PRICE, prepr_func=split_price)
         ],
         [
             CfgValue(TRADENAME),
-            CfgValue(GEO, values=['NV', 'NSW', 'SA', 'VIC']),
+            CfgValue(GEO, values=['NSW', 'SA', 'VIC']),
             CfgValue(SWEETNESS),
             CfgValue(GEO),
             CfgValue(PRICE)
@@ -122,7 +122,7 @@ def main():
             CfgValue(PRICE, prepr_func=split_price),
             CfgValue(GEO),
             CfgValue(PUNCTUATION, values=[',']),
-            CfgValue(GEO, values=['NV', 'NSW', 'SA', 'VIC'])
+            CfgValue(GEO, values=['NSW', 'SA', 'VIC'])
         ],
         [
             CfgValue(VINTAGE),
@@ -131,7 +131,7 @@ def main():
             CfgValue(PRICE, prepr_func=split_price),
             CfgValue(KEYWORD_TRUE),
             CfgValue(PUNCTUATION, values=[',']),
-            CfgValue(GEO, values=['NV', 'NSW', 'SA', 'VIC'])
+            CfgValue(GEO, values=['NSW', 'SA', 'VIC'])
         ],
         [
             CfgValue(VINTAGE),
@@ -140,7 +140,7 @@ def main():
             CfgValue(PRICE, prepr_func=split_price),
             CfgValue(KEYWORD_TRUE),
             CfgValue(PUNCTUATION, values=[',']),
-            CfgValue(GEO, values=['NV', 'NSW', 'SA', 'VIC'])
+            CfgValue(GEO, values=['NSW', 'SA', 'VIC'])
         ],
         [
             CfgValue(VINTAGE),
@@ -149,7 +149,7 @@ def main():
             CfgValue(PRICE, prepr_func=split_price),
             CfgValue(GEO),
             CfgValue(PUNCTUATION, values=[',']),
-            CfgValue(GEO, values=['NV', 'NSW', 'SA', 'VIC'])
+            CfgValue(GEO, values=['NSW', 'SA', 'VIC'])
         ],
         [
             CfgValue(VINTAGE),
@@ -158,7 +158,7 @@ def main():
             CfgValue(KEYWORD_TRUE),
             CfgValue(PRICE, prepr_func=split_price),
             CfgValue(GEO),
-            CfgValue(GEO, values=['NV', 'NSW', 'SA', 'VIC'])
+            CfgValue(GEO, values=['NSW', 'SA', 'VIC'])
         ],
         [
             CfgValue(VINTAGE),
@@ -210,7 +210,7 @@ def main():
             CfgValue(PUNCTUATION, values=['-']),
             CfgValue(GEO),
             CfgValue(PUNCTUATION, values=[',']),
-            CfgValue(GEO, values=['NV', 'NSW', 'SA', 'VIC']),
+            CfgValue(GEO, values=['NSW', 'SA', 'VIC']),
             CfgValue(COLOR),
             CfgValue(BOTTLESIZE),
             CfgValue(BOTTLESIZE, values=['mL']),
@@ -234,7 +234,7 @@ def main():
             CfgValue(PUNCTUATION, values=['-']),
             CfgValue(GEO),
             CfgValue(PUNCTUATION, values=[',']),
-            CfgValue(GEO, values=['NV', 'NSW', 'SA', 'VIC']),
+            CfgValue(GEO, values=['NSW', 'SA', 'VIC']),
             CfgValue(BOTTLESIZE),
             CfgValue(BOTTLESIZE, values=['mL']),
             CfgValue(PRICE)
@@ -246,7 +246,7 @@ def main():
             CfgValue(PUNCTUATION, values=['-']),
             CfgValue(GEO),
             CfgValue(PUNCTUATION, values=[',']),
-            CfgValue(GEO, values=['NV', 'NSW', 'SA', 'VIC']),
+            CfgValue(GEO, values=['NSW', 'SA', 'VIC']),
             CfgValue(GRAPE),
             CfgValue(BOTTLESIZE),
             CfgValue(BOTTLESIZE, values=['mL']),
