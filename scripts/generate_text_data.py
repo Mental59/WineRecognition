@@ -39,7 +39,7 @@ parser.add_argument(
 parser.add_argument(
     '-k', '--keys',
     type=str,
-    help='Which key set to use, might be one of this: "main", "all", "withoud_add", "origin_full_name"'
+    help='Which key set to use, might be one of this: "main.py", "all", "withoud_add", "origin_full_name"'
          ' (for more details see file data_info.json)'
 )
 parser.add_argument(

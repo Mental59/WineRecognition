@@ -41,6 +41,10 @@ def main():
     if not exists(OUTPUT_PATH):
         mkdir(OUTPUT_PATH)
     data_info = json.load(open('../data_info.json'))
+    for data_path in DATA_PATHS:
+        data = DataLoader.load_csv_data(data_path)
+        print(data_path, '-', len(data))
+    exit(0)
     data_sources = [DataLoader.load_csv_data(data_path) for data_path in DATA_PATHS]
     df = pd.concat(data_sources)
 
@@ -376,22 +380,30 @@ def main():
     ]
 
     complex_generators = {
-        'main': ComplexGeneratorMain(data_info['all_keys_probs']),
+        'main.py': ComplexGeneratorMain(data_info['all_keys_probs']),
         'menu': [ComplexGeneratorMenu(cfg) for cfg in cfgs]
     }
 
     n_rows = int(len(df) * PERCENT)
     total_number_of_lines = len(df) + n_rows * len(cfgs)
 
-    with open(join(OUTPUT_PATH, OUTPUT_NAME), 'w', encoding='utf-8') as file:
-        final_dataset = [
-            DataGenerator.generate_data_text_complex(df, complex_generators['main'])
-        ]
-        for complex_generator in complex_generators['menu']:
-            column_names = [value.column for value in complex_generator.cfg if value.values is None]
-            samples = df[column_names].dropna().sample(n_rows)
-            final_dataset.append(DataGenerator.generate_data_text_menu(samples, complex_generator))
-        file.write(''.join(final_dataset))
+    # with open(join(OUTPUT_PATH, OUTPUT_NAME), 'w', encoding='utf-8') as file:
+    #     final_dataset = [
+    #         DataGenerator.generate_data_text_complex(df, complex_generators['main.py'])
+    #     ]
+    #     for complex_generator in complex_generators['menu']:
+    #         column_names = [value.column for value in complex_generator.cfg if value.values is None]
+    #         samples = df[column_names].dropna().sample(n_rows)
+    #         final_dataset.append(DataGenerator.generate_data_text_menu(samples, complex_generator))
+    #     file.write(''.join(final_dataset))
+
+    final_dataset = [
+        DataGenerator.generate_data_text_complex(df, complex_generators['main.py'])
+    ]
+    for complex_generator in complex_generators['menu']:
+        column_names = [value.column for value in complex_generator.cfg if value.values is None]
+        samples = df[column_names].dropna().sample(n_rows)
+        final_dataset.append(DataGenerator.generate_data_text_menu(samples, complex_generator))
 
     print(f'Total number of lines: {total_number_of_lines}')
 
