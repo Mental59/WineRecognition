@@ -7,4 +7,6 @@ data/
 notebooks/mlruns/
 experiments/
 obsolete/
+mlruns/
 *.pth
+*.bin
