@@ -99,8 +99,10 @@ def log_mlflow_on_test(run_params, classes, x_test, y_pred, y_true):
                 output = [' '.join(word for word, tag in zip(sentence, tags) if tag == cls) for cls in classes]
                 df.append(output)
 
+            source_strings = [' '.join(sentence) for sentence in x_test]
             with pd.ExcelWriter('{}/results.xlsx'.format(run_params['output_dir']), engine='xlsxwriter') as writer:
                 pd.DataFrame(df, columns=classes).to_excel(writer, sheet_name='results')
+                pd.DataFrame(source_strings).to_excel(writer, sheet_name='source')
 
         unk_foreach_tag = run_params.pop('unk_foreach_tag', None)
         if unk_foreach_tag is not None:
