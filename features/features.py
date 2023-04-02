@@ -48,16 +48,16 @@ def word2features(sent, i: int, freq_dict):
         'isNumber(word)': is_number
     }
 
-    probs = calculate_probs(word, getprob_binary, freq_dict)
-    for key in probs:
-        features[key] = probs[key]
+    # probs = calculate_probs(word, getprob_binary, freq_dict)
+    # for key in probs:
+    #     features[key] = probs[key]
 
     if i > 0:
         word1, label1 = sent[i - 1]
 
-        probs1 = calculate_probs(f'{word1} {word}', getprob_binary, freq_dict)
-        for key in probs1:
-            features[f'-1:BGram.{key}'] = probs1[key]
+        # probs1 = calculate_probs(f'{word1} {word}', getprob_binary, freq_dict)
+        # for key in probs1:
+        #     features[f'-1:BGram.{key}'] = probs1[key]
 
         features.update({
             '-1:word.lower()': word1.lower()
@@ -66,9 +66,9 @@ def word2features(sent, i: int, freq_dict):
     if i < len(sent) - 1:
         word1, label1 = sent[i + 1]
 
-        probs1 = calculate_probs(f'{word} {word1}', getprob_binary, freq_dict)
-        for key in probs1:
-            features[f'+1:BGram.{key}'] = probs1[key]
+        # probs1 = calculate_probs(f'{word} {word1}', getprob_binary, freq_dict)
+        # for key in probs1:
+        #     features[f'+1:BGram.{key}'] = probs1[key]
 
         features.update({
             '+1:word.lower()': word1.lower()

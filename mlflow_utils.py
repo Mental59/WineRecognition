@@ -26,16 +26,16 @@ def log_mlflow_on_train(run_params, model, y_true, y_pred, test_eval):
 
         mlflow.log_text(
             metrics.flat_classification_report(y_true, y_pred, labels=model.classes_, digits=3),
-            f"{run_params['output_dir']}/flat-classification-report.txt"
+            f"{run_params['output_dir']}/flat-classification-report.txt",
         )
 
-        DataAnalyzer.analyze(
-            test_eval,
-            keys=model.classes_,
-            table_save_path=os.path.join(run_params['output_dir'], 'colored-table.xlsx'),
-            diagram_save_path=os.path.join(run_params['output_dir'], 'diagram.png'),
-            prob_table=prob_table
-        )
+        # DataAnalyzer.analyze(
+        #     test_eval,
+        #     keys=model.classes_,
+        #     table_save_path=os.path.join(run_params['output_dir'], 'colored-table.xlsx'),
+        #     diagram_save_path=os.path.join(run_params['output_dir'], 'diagram.png'),
+        #     prob_table=prob_table
+        # )
 
         unk_foreach_tag = run_params.pop('unk_foreach_tag', None)
         if unk_foreach_tag is not None:
@@ -44,10 +44,10 @@ def log_mlflow_on_train(run_params, model, y_true, y_pred, test_eval):
                 f"{run_params['output_dir']}/unk_foreach_tag.txt"
             )
 
-        mlflow.log_text(
-            eli5.format_as_html(eli5.explain_weights(model)),
-            f"{run_params['output_dir']}/explained_weights.html"
-        )
+        # mlflow.log_text(
+        #     eli5.format_as_html(eli5.explain_weights(model)),
+        #     f"{run_params['output_dir']}/explained_weights.html"
+        # )
 
         mlflow.log_artifacts(run_params['output_dir'])
 
@@ -80,13 +80,13 @@ def log_mlflow_on_test(run_params, model, y_true, y_pred, test_eval):
                 f"{run_params['output_dir']}/flat-classification-report.txt"
             )
 
-            DataAnalyzer.analyze(
-                test_eval,
-                keys=model.classes_,
-                table_save_path=os.path.join(run_params['output_dir'], 'colored-table.xlsx'),
-                diagram_save_path=os.path.join(run_params['output_dir'], 'diagram.png'),
-                prob_table=prob_table
-            )
+            # DataAnalyzer.analyze(
+            #     test_eval,
+            #     keys=model.classes_,
+            #     table_save_path=os.path.join(run_params['output_dir'], 'colored-table.xlsx'),
+            #     diagram_save_path=os.path.join(run_params['output_dir'], 'diagram.png'),
+            #     prob_table=prob_table
+            # )
         else:
             with pd.ExcelWriter(os.path.join(run_params['output_dir'], 'results.xlsx'), engine='xlsxwriter') as writer:
                 test_eval.to_excel(writer, sheet_name='values')
