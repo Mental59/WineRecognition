@@ -1,11 +1,18 @@
+import io
 import re
+import os
+import pathlib
+import uuid
 from typing import Dict, List
 import pandas as pd
 import torch
 from torch.utils.data import Dataset
 from num2words import num2words
 from features import features
+from tqdm import tqdm
 
+MODULE_DIR = pathlib.Path(__file__).parent.resolve()
+FEATURES_PATH = os.path.join(MODULE_DIR, '..', '..', 'artifacts', 'crf_features')
 
 class CustomDataset(Dataset):
     """
@@ -29,26 +36,31 @@ class CustomDataset(Dataset):
         super(CustomDataset, self).__init__()
         self.case_sensitive = case_sensitive
         self.convert_nums2words = convert_nums2words
+        self.features_path_dir = os.path.join(FEATURES_PATH, str(uuid.uuid4()))
         self.pad = 'PAD'
         self.unk = 'UNK'
         self.word_to_ix = word_to_ix
         self.tag_to_ix = tag_to_ix
         self.freq_dict = freq_dict
-        self.custom_features = None
         if not case_sensitive:
             self.word_to_ix = {word.lower(): index for word, index in word_to_ix.items()}
             self.pad = self.pad.lower()
             self.unk = self.unk.lower()
         self.raw_data_cached = list(self.compute_raw_data(data))
         self.data = self.prepare_dataset() if prepare_dataset else None
+        self.tensor_buffers = []
         if self.freq_dict is not None:
-            self.custom_features = self.compute_custom_features()
+            self.compute_custom_features()
 
     def __getitem__(self, index):
         sentence, tags = self.data[index]
         mask = tags >= 0
-        f = (self.custom_features[index] if self.custom_features is not None
-             else torch.empty(0))
+        # f = torch.load(self.get_feature_path(index)) if self.freq_dict is not None else torch.empty(0)
+        f = torch.empty(0)
+        if self.freq_dict is not None:
+            buffer = self.tensor_buffers[index]
+            f = torch.load(buffer)
+            buffer.seek(0)
         return sentence, tags, mask, f
 
     def __len__(self):
@@ -161,16 +173,27 @@ class CustomDataset(Dataset):
 
         return result
 
-    def compute_custom_features(self) -> List[torch.Tensor]:
-        custom_features = []
+    def compute_feature_tensor(self, sentence, max_len):
+        n = len(sentence)
+        word_features = [self.word2features(sentence, i, n) for i in range(n)]
+        pad_features = [[0] * len(word_features[0]) for _ in range(max_len - n)]
+        word_features.extend(pad_features)
+        features_tensor = torch.tensor(word_features, dtype=torch.float)
+        return features_tensor
+
+    def get_feature_path(self, index):
+        return os.path.join(self.features_path_dir, f'feature_{index}.pt')
+
+    def compute_custom_features(self):
+        os.mkdir(self.features_path_dir)
         max_len = self.compute_max_sentence_len(self.raw_data_cached)
-        for index, (sentence, tags) in enumerate(self.raw_data_cached):
-            n = len(sentence)
-            word_features = [self.word2features(sentence, i, n) for i in range(n)]
-            pad_features = [[0] * len(word_features[0]) for _ in range(max_len - n)]
-            word_features.extend(pad_features)
-            custom_features.append(torch.tensor(word_features, dtype=torch.float))
-        return custom_features
+        for index, (sentence, _) in enumerate(tqdm(self.raw_data_cached, desc='Computing custom features')):
+            features_tensor = self.compute_feature_tensor(sentence, max_len)
+            # feature_path = self.get_feature_path(index)
+            buffer = io.BytesIO()
+            torch.save(features_tensor, buffer)
+            buffer.seek(0)
+            self.tensor_buffers.append(buffer)
 
     def count(self, word: str):
         if not self.case_sensitive:

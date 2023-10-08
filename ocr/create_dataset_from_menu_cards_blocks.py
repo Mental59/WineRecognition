@@ -2,8 +2,8 @@ import os
 import json
 from glob import glob
 
-DATA_PATH = r'G:\PythonProjects\WineRecognition2\ocr\data\results\menus\demo-tool-results'
-OUTPUT_PATH = './data/results/wine_menus_blocks.txt'
+DATA_PATH = r'G:\PythonProjects\WineRecognition2\ocr\data\results2\markup'
+OUTPUT_PATH = './data/results2/wine_menus_blocks2.txt'
 
 
 def flatten(l):

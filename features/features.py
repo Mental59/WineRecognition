@@ -12,14 +12,16 @@ def isnumber(word: str):
 
 def getprob(freq_dict, key: str, word: str) -> float:
     try:
-        return float(freq_dict[key].loc[freq_dict[key]['value'] == word.lower()].iloc[0]['frequency'])
-    except IndexError:
+        return float(freq_dict[key].loc[word.lower(), 'frequency'])
+    except (IndexError, KeyError):
         return 0.0
 
 
 def getprob_binary(freq_dict, key, word) -> bool:
-    dict_key_value = freq_dict[key]['value']
-    return not dict_key_value.loc[dict_key_value == word.lower()].empty
+    try:
+        return not freq_dict[key].loc[word.lower()].empty
+    except KeyError:
+        return False
 
 
 def calculate_probs(word: str, prob_func: Callable, freq_dict):
@@ -48,16 +50,16 @@ def word2features(sent, i: int, freq_dict):
         'isNumber(word)': is_number
     }
 
-    # probs = calculate_probs(word, getprob_binary, freq_dict)
-    # for key in probs:
-    #     features[key] = probs[key]
+    probs = calculate_probs(word, getprob_binary, freq_dict)
+    for key in probs:
+        features[key] = probs[key]
 
     if i > 0:
         word1, label1 = sent[i - 1]
 
-        # probs1 = calculate_probs(f'{word1} {word}', getprob_binary, freq_dict)
-        # for key in probs1:
-        #     features[f'-1:BGram.{key}'] = probs1[key]
+        probs1 = calculate_probs(f'{word1} {word}', getprob_binary, freq_dict)
+        for key in probs1:
+            features[f'-1:BGram.{key}'] = probs1[key]
 
         features.update({
             '-1:word.lower()': word1.lower()
@@ -66,9 +68,9 @@ def word2features(sent, i: int, freq_dict):
     if i < len(sent) - 1:
         word1, label1 = sent[i + 1]
 
-        # probs1 = calculate_probs(f'{word} {word1}', getprob_binary, freq_dict)
-        # for key in probs1:
-        #     features[f'+1:BGram.{key}'] = probs1[key]
+        probs1 = calculate_probs(f'{word} {word1}', getprob_binary, freq_dict)
+        for key in probs1:
+            features[f'+1:BGram.{key}'] = probs1[key]
 
         features.update({
             '+1:word.lower()': word1.lower()

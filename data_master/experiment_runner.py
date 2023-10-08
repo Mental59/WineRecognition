@@ -1,10 +1,12 @@
 import os
 import json
+import sys
+
 import papermill as pm
 import datetime
 
 
-def run_experiment(experiment: dict, exp_settings_path: str, notebook_path: str, train=True) -> dict:
+def run_experiment(experiment: dict, exp_settings_path: str, notebook_path: str, train=True, log_output=False) -> dict:
     experiment_settings = json.load(open(exp_settings_path))
     mode = 'train' if train else 'test'
 
@@ -19,7 +21,10 @@ def run_experiment(experiment: dict, exp_settings_path: str, notebook_path: str,
     pm.execute_notebook(
         input_path=notebook_path,
         output_path=os.path.join(experiment['OUTPUT_DIR'], os.path.basename(notebook_path)),
-        parameters=experiment
+        parameters=experiment,
+        log_output=log_output,
+        stdout_file=sys.stdout,
+        stderr_file=sys.stderr,
     )
 
     return experiment

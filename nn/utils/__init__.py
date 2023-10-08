@@ -81,14 +81,20 @@ def generate_tag_to_ix(keys: list):
     return tag_to_ix
 
 
-def get_model_confidence(model: nn.Module, X_test: List[torch.Tensor], device, custom_features=None) -> List[float]:
+def get_model_confidence(
+        model: nn.Module, X_test: List[torch.Tensor], device, test_dataset: CustomDataset = None) -> List[float]:
     """Computes model's confidence for each sentence in X_test"""
     confs = []
     with torch.no_grad():
         for index, sentence in enumerate(X_test):
             sentence = sentence.unsqueeze(0).to(device)
-            f = (custom_features[index][:sentence.size(1), ...].unsqueeze(0).to(device)
-                 if custom_features is not None else None)
+
+            f = None
+            if test_dataset is not None:
+                _, _, _, custom_features = test_dataset[index]
+                if custom_features is not None:
+                    f = custom_features[:sentence.size(1), ...].unsqueeze(0).to(device)
+
             best_tag_sequence = model(sentence, custom_features=f)
             confidence = torch.exp(
                 -model.neg_log_likelihood(
@@ -98,4 +104,5 @@ def get_model_confidence(model: nn.Module, X_test: List[torch.Tensor], device, c
                 )
             )
             confs.append(confidence.item())
+
     return confs

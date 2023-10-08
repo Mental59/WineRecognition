@@ -8,5 +8,8 @@ notebooks/mlruns/
 experiments/
 obsolete/
 mlruns/
+notebooks/bert/mlruns
+notebooks/bert/tokenizers
+notebooks/bert/distilbert*
 *.pth
 *.bin
