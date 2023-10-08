@@ -6,12 +6,25 @@ from matplotlib import pyplot as plt
 from .custom_dataset import CustomDataset
 
 
-def train(model, optimizer, dataloaders, device, num_epochs, output_dir, scheduler=None, tqdm=None, verbose=True):
+def train(
+        model,
+        optimizer,
+        dataloaders,
+        device,
+        num_epochs,
+        output_dir,
+        neptune_run=None,
+        scheduler=None,
+        tqdm=None,
+        verbose=True):
     losses = {'train': [], 'val': []}
     best_loss = None
 
     for epoch in range(1, num_epochs + 1) if tqdm is None else tqdm(range(1, num_epochs + 1)):
         losses_per_epoch = {'train': 0.0, 'val': 0.0}
+
+        if neptune_run is not None:
+            neptune_run['epoch'] = epoch
 
         model.train()
         for x_batch, y_batch, mask_batch, custom_features in dataloaders['train']:
@@ -23,6 +36,10 @@ def train(model, optimizer, dataloaders, device, num_epochs, output_dir, schedul
             loss = model.neg_log_likelihood(x_batch, y_batch, mask_batch, custom_features)
             loss.backward()
             optimizer.step()
+
+            if neptune_run is not None:
+                neptune_run['train/batch/loss'].append(loss.item())
+
             losses_per_epoch['train'] += loss.item()
 
         model.eval()
@@ -33,6 +50,10 @@ def train(model, optimizer, dataloaders, device, num_epochs, output_dir, schedul
                 mask_batch = mask_batch.to(device)
                 custom_features = custom_features.to(device)
                 loss = model.neg_log_likelihood(x_batch, y_batch, mask_batch, custom_features)
+
+                if neptune_run is not None:
+                    neptune_run['val/batch/loss'].append(loss.item())
+
                 losses_per_epoch['val'] += loss.item()
 
         for mode in ['train', 'val']:
@@ -41,7 +62,10 @@ def train(model, optimizer, dataloaders, device, num_epochs, output_dir, schedul
 
         if best_loss is None or best_loss > losses_per_epoch['val']:
             best_loss = losses_per_epoch['val']
-            torch.save(model.state_dict(), os.path.join(output_dir, 'model.pth'))
+            model_path = os.path.join(output_dir, 'model.pth')
+            torch.save(model.state_dict(), model_path)
+            if neptune_run is not None:
+                neptune_run['model_checkpoints/best_model'].upload(model_path)
 
         if scheduler is not None:
             scheduler.step(losses_per_epoch['val'])
@@ -106,3 +130,33 @@ def get_model_confidence(
             confs.append(confidence.item())
 
     return confs
+
+def get_model_mean_confidence(
+        model: nn.Module,
+        X_test: List[torch.Tensor],
+        device,
+        tqdm,
+        test_dataset: CustomDataset = None) -> float:
+    """Computes model's confidence for each sentence in X_test"""
+    conf = 0
+    with torch.no_grad():
+        for index, sentence in tqdm(enumerate(X_test)):
+            sentence = sentence.unsqueeze(0).to(device)
+
+            f = None
+            if test_dataset is not None:
+                _, _, _, custom_features = test_dataset[index]
+                if custom_features is not None:
+                    f = custom_features[:sentence.size(1), ...].unsqueeze(0).to(device)
+
+            best_tag_sequence = model(sentence, custom_features=f)
+            confidence = torch.exp(
+                -model.neg_log_likelihood(
+                    sentence,
+                    torch.tensor(best_tag_sequence, device=device),
+                    custom_features=f
+                )
+            )
+            conf += confidence.item()
+
+    return conf / len(X_test)
