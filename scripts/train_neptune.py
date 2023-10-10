@@ -10,6 +10,10 @@ import neptune
 run = neptune.init_run(
     project="mentalakv/wine-recognition",
     api_token=os.getenv('NEPTUNE_API_KEY'),
+    capture_stderr=True,
+    capture_stdout=True,
+    capture_traceback=True,
+    capture_hardware_metrics=True
 )
 
 params = {
