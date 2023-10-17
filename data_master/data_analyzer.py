@@ -144,3 +144,5 @@ class DataAnalyzer:
                 prob_table.to_excel(writer, sheet_name='probabilities')
 
         plt.savefig(diagram_save_path)
+
+        return fig, colored_predicted, df_actual

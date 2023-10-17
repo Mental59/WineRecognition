@@ -1,6 +1,7 @@
 import os
 from typing import List
 import torch
+import wandb
 from torch import nn
 from matplotlib import pyplot as plt
 from .custom_dataset import CustomDataset
@@ -14,17 +15,22 @@ def train(
         num_epochs,
         output_dir,
         neptune_run=None,
+        log_wandb=False,
         scheduler=None,
         tqdm=None,
         verbose=True):
     losses = {'train': [], 'val': []}
     best_loss = None
+    model_path = os.path.join(output_dir, 'model.pth')
+    model_artifact = None
 
     for epoch in range(1, num_epochs + 1) if tqdm is None else tqdm(range(1, num_epochs + 1)):
         losses_per_epoch = {'train': 0.0, 'val': 0.0}
 
         if neptune_run is not None:
             neptune_run['epoch'] = epoch
+        if log_wandb:
+            wandb.log({'epoch': epoch})
 
         model.train()
         for x_batch, y_batch, mask_batch, custom_features in dataloaders['train']:
@@ -39,6 +45,8 @@ def train(
 
             if neptune_run is not None:
                 neptune_run['train/batch/loss'].append(loss.item())
+            if log_wandb:
+                wandb.log({'train': {'batch': {'loss': loss.item()}}})
 
             losses_per_epoch['train'] += loss.item()
 
@@ -53,6 +61,8 @@ def train(
 
                 if neptune_run is not None:
                     neptune_run['val/batch/loss'].append(loss.item())
+                if log_wandb:
+                    wandb.log({'val': {'batch': {'loss': loss.item()}}})
 
                 losses_per_epoch['val'] += loss.item()
 
@@ -62,10 +72,13 @@ def train(
 
         if best_loss is None or best_loss > losses_per_epoch['val']:
             best_loss = losses_per_epoch['val']
-            model_path = os.path.join(output_dir, 'model.pth')
             torch.save(model.state_dict(), model_path)
+
             if neptune_run is not None:
                 neptune_run['model_checkpoints/best_model'].upload(model_path)
+            if log_wandb:
+                model_artifact = wandb.Artifact('best_model', type='model')
+                model_artifact.add_file(model_path, 'model.pth')
 
         if scheduler is not None:
             scheduler.step(losses_per_epoch['val'])
@@ -77,6 +90,9 @@ def train(
                 'val_loss: {}'.format(losses_per_epoch['val']),
                 sep=', '
             )
+
+    if log_wandb and model_artifact is not None:
+        wandb.log_artifact(model_artifact)
 
     model.load_state_dict(torch.load(os.path.join(output_dir, 'model.pth')))
     return model, losses

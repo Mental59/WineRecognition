@@ -1,5 +1,7 @@
 .git/
 .idea/
+.neptune/
+wandb/
 __pycache__/
 .ipynb_checkpoints/
 artifacts/
