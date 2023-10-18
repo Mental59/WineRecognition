@@ -22,7 +22,6 @@ def train(
     losses = {'train': [], 'val': []}
     best_loss = None
     model_path = os.path.join(output_dir, 'model.pth')
-    model_artifact = None
 
     for epoch in range(1, num_epochs + 1) if tqdm is None else tqdm(range(1, num_epochs + 1)):
         losses_per_epoch = {'train': 0.0, 'val': 0.0}
@@ -74,12 +73,6 @@ def train(
             best_loss = losses_per_epoch['val']
             torch.save(model.state_dict(), model_path)
 
-            if neptune_run is not None:
-                neptune_run['model_checkpoints/best_model'].upload(model_path)
-            if log_wandb:
-                model_artifact = wandb.Artifact('best_model', type='model')
-                model_artifact.add_file(model_path, 'model.pth')
-
         if scheduler is not None:
             scheduler.step(losses_per_epoch['val'])
 
@@ -91,10 +84,16 @@ def train(
                 sep=', '
             )
 
-    if log_wandb and model_artifact is not None:
-        wandb.log_artifact(model_artifact)
+    if os.path.exists(model_path):
+        if neptune_run is not None:
+            neptune_run['model_checkpoints/best_model'].upload(model_path)
+        if log_wandb:
+            model_artifact = wandb.Artifact('best_model', type='model')
+            model_artifact.add_file(model_path, 'model.pth')
+            wandb.log_artifact(model_artifact)
 
-    model.load_state_dict(torch.load(os.path.join(output_dir, 'model.pth')))
+        model.load_state_dict(torch.load(model_path))
+
     return model, losses
 
 
