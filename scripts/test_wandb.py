@@ -4,7 +4,7 @@ import random
 # start a new wandb run to track this script
 wandb.init(
     # set the wandb project where this run will be logged
-    project="wine-recognition",
+    project="test-project",
 
     # track hyperparameters and run metadata
     config={
@@ -20,9 +20,12 @@ wandb.init(
     },
 )
 
-artifact = wandb.Artifact('dataset', type='dataset')
-artifact.add_file(r"G:\PythonProjects\WineRecognition2\data\text\Bruxelles_Wine_ES-all_keys.txt", 'dataset.txt')
-wandb.log_artifact(artifact)
+obj = wandb.Object3D(r"G:\dev\texturing-3d-shapes\TEXTurePaper\shapes\barrel.obj")
+wandb.log({'objects': {'barrel': obj}})
+
+# artifact = wandb.Artifact('dataset', type='dataset')
+# artifact.add_file(r"G:\PythonProjects\WineRecognition2\data\text\Bruxelles_Wine_ES-all_keys.txt", 'dataset.txt')
+# wandb.log_artifact(artifact)
 
 # simulate training
 # epochs = 10

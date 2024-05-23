@@ -1,10 +1,9 @@
 from typing import Optional, List
 
 import torch
+
 from torch import nn
 from torchcrf import CRF
-
-
 class BiLSTM_CRF(nn.Module):
     def __init__(self, vocab_size: int, num_tags: int, embedding_dim: int, hidden_dim: int,
                  padding_idx: int = None, custom_features_size: int = 0):

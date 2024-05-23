@@ -2,8 +2,6 @@ import matplotlib.pyplot as plt
 from matplotlib import style
 import pandas as pd
 
-from neptune.types import File
-
 
 class DataAnalyzer:
     """Class for analyzing results"""
